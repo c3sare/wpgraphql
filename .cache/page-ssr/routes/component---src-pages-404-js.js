@@ -99,7 +99,11 @@ const Layout = ({
     className: "global-header"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default().createElement(gatsby__WEBPACK_IMPORTED_MODULE_2__.Link, {
     to: "/"
-  }, title), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default().createElement(_Navigation__WEBPACK_IMPORTED_MODULE_3__["default"], null)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default().createElement("main", null, children), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default().createElement("footer", null, "\xA9 ", new Date().getFullYear(), ", Built with", ` `, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default().createElement("a", {
+  }, title), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default().createElement(_Navigation__WEBPACK_IMPORTED_MODULE_3__["default"], null)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default().createElement("main", {
+    style: {
+      padding: '10px'
+    }
+  }, children), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default().createElement("footer", null, "\xA9 ", new Date().getFullYear(), ", Built with", ` `, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default().createElement("a", {
     href: "https://www.gatsbyjs.com"
   }, "Gatsby"), ` `, "And ", /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default().createElement("a", {
     href: "https://wordpress.org/"
@@ -237,7 +241,7 @@ const pageQuery = "3159585216";
   \***********************************************/
 /***/ ((module) => {
 
-module.exports = JSON.parse('{"data":{"allWpMenuItem":{"nodes":[{"key":"cG9zdDozMA==","parentId":null,"title":"Strona główna","url":"http://wp-elementor-gatsby.local"},{"key":"cG9zdDozMg==","parentId":"cG9zdDozMA==","title":"Elementor #7","url":"/elementor-7/"},{"key":"cG9zdDozNA==","parentId":null,"title":"Sample Page","url":"/sample-page/"}]}}}');
+module.exports = JSON.parse('{"data":{"allWpMenuItem":{"nodes":[]}}}');
 
 /***/ }),
 
@@ -247,7 +251,7 @@ module.exports = JSON.parse('{"data":{"allWpMenuItem":{"nodes":[{"key":"cG9zdDoz
   \***********************************************/
 /***/ ((module) => {
 
-module.exports = JSON.parse('{"data":{"wp":{"generalSettings":{"title":"WP Elementor Gatsby","description":"Just another WordPress site"}}}}');
+module.exports = JSON.parse('{"data":{"wp":{"generalSettings":{"title":"Elementor Gatsby WP","description":"Just another WordPress site"}}}}');
 
 /***/ }),
 
@@ -257,7 +261,7 @@ module.exports = JSON.parse('{"data":{"wp":{"generalSettings":{"title":"WP Eleme
   \**********************************************/
 /***/ ((module) => {
 
-module.exports = JSON.parse('{"data":{"wp":{"generalSettings":{"title":"WP Elementor Gatsby","description":"Just another WordPress site"}},"wpUser":{"twitter":"admin"}}}');
+module.exports = JSON.parse('{"data":{"wp":{"generalSettings":{"title":"Elementor Gatsby WP","description":"Just another WordPress site"}},"wpUser":{"twitter":"admin"}}}');
 
 /***/ })
 

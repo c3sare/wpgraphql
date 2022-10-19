@@ -28,7 +28,7 @@ module.exports = {
         // the only required plugin option for WordPress is the GraphQL url.
         url:
           process.env.WPGRAPHQL_URL ||
-          `http://wp-elementor-gatsby.local/graphql`,
+          `http://elementor-gatsby-wp.local/graphql`,
       },
     },
 

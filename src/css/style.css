@@ -1,5 +1,9 @@
 /* CSS Custom Properties Definitions */
 
+img {
+  max-width: 100%;
+}
+
 :root {
   --maxWidth-none: "none";
   --maxWidth-xs: 20rem;
@@ -243,7 +247,7 @@ a:focus {
 
 .global-wrapper {
   margin: var(--spacing-0) auto;
-  max-width: var(--maxWidth-wrapper);
+  max-width: 1140px;
   padding: var(--spacing-10) var(--spacing-5);
 }
 
@@ -273,7 +277,7 @@ a:focus {
   position: relative;
 }
 .global-header > div > ul > li ul li {
-  position:relative;
+  position: relative;
   width: 100%;
 }
 

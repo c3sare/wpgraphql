@@ -7,7 +7,7 @@ import { graphql } from "gatsby"
 // failures.
 // @todo update this once @wordpress upgrades their postcss version
 import "../css/@wordpress/block-library/build-style/style.css"
-import "../css/@wordpress/block-library/build-style/theme.css"
+import "../css/@wordpress/block-library/build-style/theme.css";
 
 import Layout from "../components/layout";
 import Seo from "../components/seo";
@@ -32,7 +32,7 @@ function generatePage(nodes) {
             this,
             [
                 elTypes[node.elType === 'widget' ? node.widgetType : node.elType],
-                {...node.settings}
+                {...node.settings, key: node.id}
             ]
         .concat(node.elements.length > 0 ? generatePage(node.elements) : [])
     ));
