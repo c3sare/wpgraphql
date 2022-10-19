@@ -253,6 +253,41 @@ a:focus {
 
 .global-header {
   margin-bottom: var(--spacing-12);
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+}
+
+.global-header ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.global-header li {
+  margin: 5px;
+}
+
+.global-header > div > ul > li {
+  display: inline-block;
+  position: relative;
+}
+.global-header > div > ul > li ul li {
+  position:relative;
+  width: 100%;
+}
+
+.global-header > div > ul > li ul {
+  position: absolute;
+  top: 100%;
+}
+
+.global-header > div > ul > li:hover ul {
+  display: block;
+}
+
+.global-header > div > ul > li ul {
+  display: none;
 }
 
 .main-heading {

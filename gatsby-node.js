@@ -13,19 +13,47 @@ const chunk = require(`lodash/chunk`)
  */
 exports.createPages = async gatsbyUtilities => {
   // Query our posts from the GraphQL server
-  const posts = await getPosts(gatsbyUtilities)
+  const posts = await getPosts(gatsbyUtilities);
+  const pages = await getPages(gatsbyUtilities);
 
   // If there are no posts in WordPress, don't do anything
-  if (!posts.length) {
-    return
+
+  if (posts.length > 0) {
+    await createIndividualBlogPostPages({ posts, gatsbyUtilities });
+    await createBlogPostArchive({ posts, gatsbyUtilities });
   }
 
-  // If there are posts, create pages for them
-  await createIndividualBlogPostPages({ posts, gatsbyUtilities })
-
-  // And a paginated archive
-  await createBlogPostArchive({ posts, gatsbyUtilities })
+  if(pages.length > 0) {
+    await createIndividualPages({pages, gatsbyUtilities});
+  }
 }
+
+const createIndividualPages = async ({ pages, gatsbyUtilities }) =>
+  Promise.all(
+    pages.map(({ id, uri }) =>
+      // createPage is an action passed to createPages
+      // See https://www.gatsbyjs.com/docs/actions#createPage for more info
+      gatsbyUtilities.actions.createPage({
+        // Use the WordPress uri as the Gatsby page path
+        // This is a good idea so that internal links and menus work 👍
+        path: uri,
+
+        // use the blog post template as the page component
+        component: path.resolve(`./src/templates/page.js`),
+
+        // `context` is available in the template as a prop and
+        // as a variable in GraphQL.
+        context: {
+          // we need to add the post id here
+          // so our blog post template knows which blog post
+          // the current page is (when you open it in a browser)
+          id,
+
+          // We also use the next and previous id's to query them and add links!
+        },
+      })
+    )
+  )
 
 /**
  * This function creates all the individual blog pages in this site
@@ -65,13 +93,15 @@ const createIndividualBlogPostPages = async ({ posts, gatsbyUtilities }) =>
 async function createBlogPostArchive({ posts, gatsbyUtilities }) {
   const graphqlResult = await gatsbyUtilities.graphql(/* GraphQL */ `
     {
-      readingSettings {
-        postsPerPage
+      wp {
+        readingSettings {
+          postsPerPage
+        }
       }
     }
   `)
 
-  const { postsPerPage } = graphqlResult.data.readingSettings
+  const { postsPerPage } = graphqlResult.data.wp.readingSettings
 
   const postsChunkedIntoArchivePages = chunk(posts, postsPerPage)
   const totalPages = postsChunkedIntoArchivePages.length
@@ -161,4 +191,27 @@ async function getPosts({ graphql, reporter }) {
   }
 
   return graphqlResult.data.allWpPost.edges
+}
+
+async function getPages({ graphql, reporter }) {
+  const graphqlResult = await graphql(/* GraphQL */ `
+    query WP_PAGES {
+      allWpPage {
+        nodes {
+          id
+          uri
+        }
+      }
+    }
+  `)
+
+  if (graphqlResult.errors) {
+    reporter.panicOnBuild(
+      `There was an error loading your pages`,
+      graphqlResult.errors
+    )
+    return
+  }
+
+  return graphqlResult.data.allWpPage.nodes;
 }
