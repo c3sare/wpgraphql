@@ -45,7 +45,7 @@ function getElementorPages(pages, gatsbyUtilities) {
 
 const createIndividualPages = ({ pagesElementor, gatsbyUtilities }) =>
   Promise.all(
-    pagesElementor.map(({ id, uri, elementorContent, title, internal: {description}}) => {
+    pagesElementor.map(({ uri, elementorContent, title, internal: {description}}) => {
       // createPage is an action passed to createPages
       // See https://www.gatsbyjs.com/docs/actions#createPage for more info
       return gatsbyUtilities.actions.createPage({
@@ -214,7 +214,7 @@ const size = {
   thumbnail: 150,
   medium: 300,
   "medium-large": 768,
-  large: "1024px",
+  large: 1024,
   "1536x1536": 1536,
   "2048x2048": 2048,
   full: 2048,
@@ -223,16 +223,18 @@ const size = {
 function transformNode(nodes, { graphql, reporter }) {
   return Promise.all(nodes.map( async item => {
       if(item.elType === "widget" && item.widgetType === "image") {
+
           const query = await graphql(`
-            query Assets($url: String!, $size: Int!){
+            query AssetHeight($url: String!, $size: Int!){
               wpMediaItem(localFile: {url: {eq: $url}}) {
                 gatsbyImage(width: $size)
               }
             }
           `, {
             url: item.settings.image.url,
-            size: size[item.settings?.image_size || "large"]
+            size: size[item.settings?.image_size || "large"],
           });
+
 
           if(query.errors) {
             reporter.panicOnBuild(
@@ -242,7 +244,7 @@ function transformNode(nodes, { graphql, reporter }) {
             return item;
           }
 
-          item.settings.image.data = query.data.wpMediaItem;
+          item.settings.image.data = query.data.wpMediaItem.gatsbyImage;
       }
 
       if(item.elements?.length > 0) item.elements = await transformNode(item.elements, { graphql, reporter });
@@ -256,7 +258,6 @@ async function getPages({ graphql, reporter }) {
     query WP_PAGES {
       allWpPage {
         nodes {
-          id
           uri
           elementorContent
           title

@@ -1,15 +1,6 @@
+import { GatsbyImage } from "gatsby-plugin-image";
 import React from "react";
 import { LightBox } from "../components/layout";
-
-const size = {
-  thumbnail: "150px",
-  medium: "300px",
-  "medium-large": "768px",
-  large: "1024px",
-  "1536x1536": "1536px",
-  "2048x2048": "2048px",
-  full: "100%",
-};
 
 const alignFlex = {
   left: "start",
@@ -18,23 +9,15 @@ const alignFlex = {
 };
 
 const Image = ({
-  image: { alt = "", url },
+  image: { alt = "", url, data },
   align = "center",
   caption = "",
   caption_source = "",
-  image_custom_dimension,
-  image_size = "large",
   link_to = "",
   link,
 }) => {
   const [__state, dispatch] = React.useContext(LightBox);
-  const Img = (
-    <img
-      src={url}
-      alt={alt}
-      style={image_size === "custom" ? {} : { maxWidth: size[image_size] }}
-    />
-  );
+  const Img = <GatsbyImage image={data} alt={alt} />;
   return (
     <div
       style={{
@@ -50,12 +33,6 @@ const Image = ({
           target={link.is_external ? "_blank" : "_self"}
           style={{
             overflow: "hidden",
-            ...(image_size === "custom"
-              ? {
-                  width: `${image_custom_dimension.width}px`,
-                  height: `${image_custom_dimension.height}px`,
-                }
-              : {}),
           }}
           onClick={(e) => {
             if (link_to === "file") {
@@ -74,12 +51,6 @@ const Image = ({
         <div
           style={{
             overflow: "hidden",
-            ...(image_size === "custom"
-              ? {
-                  width: `${image_custom_dimension.width}px`,
-                  height: `${image_custom_dimension.height}px`,
-                }
-              : {}),
           }}
         >
           {Img}
