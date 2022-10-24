@@ -1,5 +1,4 @@
 import React from "react"
-import { graphql } from "gatsby"
 
 // We're using Gutenberg so we need the block styles
 // these are copied into this project due to a conflict in the postCSS
@@ -38,31 +37,18 @@ function generatePage(nodes) {
     ));
 }
 
-const PageTemplate = ({ data: { wpPage: {title, elementorContent, internal} } }) => {
-  const nodes = JSON.parse(elementorContent).slice(0, 2);
-  console.log(nodes);
+const PageTemplate = ({ pageContext: {elContent, title, description} }) => {
+  // const nodes = JSON.parse(el).slice(0, 2);
+  // console.log(nodes);
+  console.log(elContent);
 
   return (
     <Layout>
-      <Seo title={title} description={internal.description} />
+      <Seo title={title} description={description} />
       <h1>{title}</h1>
-      {generatePage(nodes)}
+      {generatePage(elContent.slice(0, 2))}
     </Layout>
   )
 }
 
 export default PageTemplate;
-
-export const pageQuery = graphql`
-  query PageById(
-    $id: String!
-  ) {
-    wpPage(id: {eq: $id}) {
-        title
-        elementorContent
-        internal {
-            description
-        }
-    }
-  }
-`

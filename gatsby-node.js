@@ -1,5 +1,5 @@
 const path = require(`path`)
-const chunk = require(`lodash/chunk`)
+const chunk = require(`lodash/chunk`);
 
 // This is a simple debugging tool
 // dd() will prettily dump to the terminal and kill the process
@@ -15,6 +15,7 @@ exports.createPages = async gatsbyUtilities => {
   // Query our posts from the GraphQL server
   const posts = await getPosts(gatsbyUtilities);
   const pages = await getPages(gatsbyUtilities);
+  const pagesElementor = await getElementorPages(pages, gatsbyUtilities);
 
   // If there are no posts in WordPress, don't do anything
 
@@ -23,17 +24,31 @@ exports.createPages = async gatsbyUtilities => {
     await createBlogPostArchive({ posts, gatsbyUtilities });
   }
 
-  if(pages.length > 0) {
-    await createIndividualPages({pages, gatsbyUtilities});
+  if(pagesElementor.length > 0) {
+    await createIndividualPages({pagesElementor, gatsbyUtilities});
   }
 }
 
-const createIndividualPages = async ({ pages, gatsbyUtilities }) =>
+function getElementorPages(pages, gatsbyUtilities) {
+  return Promise.all(pages.map( async item => {
+    if(item.elementorContent.length > 0) item.elementorContent = await transformNode(JSON.parse(item.elementorContent), gatsbyUtilities);
+    else item.elementorContent = [];
+    return item;
+  })).then(
+    data => data
+  )
+  .catch(err => {
+    console.log(err);
+    return []
+  })
+}
+
+const createIndividualPages = ({ pagesElementor, gatsbyUtilities }) =>
   Promise.all(
-    pages.map(({ id, uri }) =>
+    pagesElementor.map(({ id, uri, elementorContent, title, internal: {description}}) => {
       // createPage is an action passed to createPages
       // See https://www.gatsbyjs.com/docs/actions#createPage for more info
-      gatsbyUtilities.actions.createPage({
+      return gatsbyUtilities.actions.createPage({
         // Use the WordPress uri as the Gatsby page path
         // This is a good idea so that internal links and menus work 👍
         path: uri,
@@ -47,12 +62,14 @@ const createIndividualPages = async ({ pages, gatsbyUtilities }) =>
           // we need to add the post id here
           // so our blog post template knows which blog post
           // the current page is (when you open it in a browser)
-          id,
+          elContent: elementorContent,
+          title,
+          description
 
           // We also use the next and previous id's to query them and add links!
         },
       })
-    )
+    })
   )
 
 /**
@@ -193,6 +210,47 @@ async function getPosts({ graphql, reporter }) {
   return graphqlResult.data.allWpPost.edges
 }
 
+const size = {
+  thumbnail: 150,
+  medium: 300,
+  "medium-large": 768,
+  large: "1024px",
+  "1536x1536": 1536,
+  "2048x2048": 2048,
+  full: 2048,
+};
+
+function transformNode(nodes, { graphql, reporter }) {
+  return Promise.all(nodes.map( async item => {
+      if(item.elType === "widget" && item.widgetType === "image") {
+          const query = await graphql(`
+            query Assets($url: String!, $size: Int!){
+              wpMediaItem(localFile: {url: {eq: $url}}) {
+                gatsbyImage(width: $size)
+              }
+            }
+          `, {
+            url: item.settings.image.url,
+            size: size[item.settings?.image_size || "large"]
+          });
+
+          if(query.errors) {
+            reporter.panicOnBuild(
+              `There was an error loading your pages`,
+              query.errors
+            )
+            return item;
+          }
+
+          item.settings.image.data = query.data.wpMediaItem;
+      }
+
+      if(item.elements?.length > 0) item.elements = await transformNode(item.elements, { graphql, reporter });
+
+      return item;
+  }))
+}
+
 async function getPages({ graphql, reporter }) {
   const graphqlResult = await graphql(/* GraphQL */ `
     query WP_PAGES {
@@ -200,6 +258,11 @@ async function getPages({ graphql, reporter }) {
         nodes {
           id
           uri
+          elementorContent
+          title
+          internal {
+              description
+          }
         }
       }
     }
