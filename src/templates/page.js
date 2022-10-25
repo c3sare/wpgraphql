@@ -34,7 +34,7 @@ function generatePage(nodes) {
 }
 
 const PageTemplate = ({ pageContext: {elContent, title, description} }) => {
-  console.log(elContent);
+  console.log(elContent[0].elements[0].elements[2]);
 
   return (
     <Layout title={title} description={description}>

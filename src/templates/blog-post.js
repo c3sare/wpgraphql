@@ -30,7 +30,6 @@ const BlogPostTemplate = ({ data: { previous, next, post } }) => {
 
           <p>{post.date}</p>
 
-          {/* if we have a featured image for this post let's display it */}
           {featuredImage?.data && (
             <GatsbyImage
               image={featuredImage.data}
@@ -82,11 +81,11 @@ const BlogPostTemplate = ({ data: { previous, next, post } }) => {
   )
 }
 
+export default BlogPostTemplate;
+
 export const Head = ({ data: { post } }) => (
   <Seo title={post.title} description={post.description}/>
 )
-
-export default BlogPostTemplate
 
 export const pageQuery = graphql`
   query BlogPostById(

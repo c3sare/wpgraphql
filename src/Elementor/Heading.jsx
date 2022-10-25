@@ -30,7 +30,7 @@ const Heading = ({ align, title, header_size = "h2", size, link }) => {
     <a
       href={link.url}
       target={link.is_external === "on" ? "_blank" : "_self"}
-      rel={link.nofollow === "on" ? "nofollow" : "noreferrer"}
+      rel="noreferrer"
     >
       {textElement}
     </a>

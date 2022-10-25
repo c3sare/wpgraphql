@@ -64,11 +64,7 @@ const Layout = ({isHomePage, children}) => {
         <main style={{padding: '10px'}}>{children}</main>
 
         <footer>
-          © {new Date().getFullYear()}, Built with
-          {` `}
-          <a href="https://www.gatsbyjs.com">Gatsby</a>
-          {` `}
-          And <a href="https://wordpress.org/">WordPress</a>
+          © {new Date().getFullYear()} for c3sare.pl
         </footer>
         {state.open && <Lightbox
           mainSrc={state.images[state.currentIndex]}

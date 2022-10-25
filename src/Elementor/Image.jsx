@@ -16,7 +16,7 @@ const Image = ({
   link_to = "",
   link,
 }) => {
-  const [__state, dispatch] = React.useContext(LightBox);
+  const dispatch = React.useContext(LightBox)[1];
   const Img = <GatsbyImage image={data} alt={alt} />;
   return (
     <div
@@ -29,7 +29,7 @@ const Image = ({
     >
       {link_to === "custom" || link_to === "file" ? (
         <a
-          rel={"noreferrer"}
+          rel="noreferrer"
           target={link.is_external ? "_blank" : "_self"}
           style={{
             overflow: "hidden",
