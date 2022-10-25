@@ -3,8 +3,8 @@ import { Link, graphql } from "gatsby"
 import parse from "html-react-parser"
 
 import Bio from "../components/bio"
-import Layout from "../components/layout"
-import Seo from "../components/seo"
+import Layout from "../components/layout";
+import Seo from "../components/seo";
 
 const BlogIndex = ({
   data,
@@ -15,11 +15,9 @@ const BlogIndex = ({
   if (!posts.length) {
     return (
       <Layout isHomePage>
-        <Seo title="All posts" />
         <Bio />
         <p>
-          No blog posts found. Add posts to your WordPress site and they'll
-          appear here!
+          Nie znaleziono żadnych wpisów. Dodaj jakieś żeby je tu zobaczyć.
         </p>
       </Layout>
     )
@@ -27,8 +25,6 @@ const BlogIndex = ({
 
   return (
     <Layout isHomePage>
-      <Seo title="All posts" />
-
       <Bio />
 
       <ol style={{ listStyle: `none` }}>
@@ -59,16 +55,20 @@ const BlogIndex = ({
 
       {previousPagePath && (
         <>
-          <Link to={previousPagePath}>Previous page</Link>
+          <Link to={previousPagePath}>Poprzednia strona</Link>
           <br />
         </>
       )}
-      {nextPagePath && <Link to={nextPagePath}>Next page</Link>}
+      {nextPagePath && <Link to={nextPagePath}>Następna strona</Link>}
     </Layout>
   )
 }
 
-export default BlogIndex
+export default BlogIndex;
+
+export const Head = () => (
+  <Seo title="Wszystkie wpisy" description=""/>
+)
 
 export const pageQuery = graphql`
   query WordPressPostArchive($offset: Int!, $postsPerPage: Int!) {

@@ -223,16 +223,32 @@ const size = {
 function transformNode(nodes, { graphql, reporter }) {
   return Promise.all(nodes.map( async item => {
       if(item.elType === "widget" && item.widgetType === "image") {
+          const sizeImage = await graphql(`
+            query AssetHeight($url: String!){
+              wpMediaItem(localFile: {url: {eq: $url}}) {
+                width
+                height
+              }
+            }
+          `, {
+            url: item.settings.image.url,
+          })
 
           const query = await graphql(`
-            query AssetHeight($url: String!, $size: Int!){
+            query AssetHeight($url: String!, $size: Int!, $greater: Boolean!){
               wpMediaItem(localFile: {url: {eq: $url}}) {
-                gatsbyImage(width: $size)
+                gatsbyImage(width: $size, formats: WEBP, placeholder: BLURRED) @include (if: $greater)
+                localFile @skip (if: $greater) {
+                  childImageSharp {
+                    gatsbyImageData(height: $size, formats: WEBP, placeholder: BLURRED)
+                  }
+                }
               }
             }
           `, {
             url: item.settings.image.url,
             size: size[item.settings?.image_size || "large"],
+            greater: sizeImage.data.wpMediaItem.width >= sizeImage.data.wpMediaItem.height
           });
 
 
@@ -244,7 +260,7 @@ function transformNode(nodes, { graphql, reporter }) {
             return item;
           }
 
-          item.settings.image.data = query.data.wpMediaItem.gatsbyImage;
+          item.settings.image.data = query.data?.wpMediaItem?.gatsbyImage || query.data.wpMediaItem.localFile?.childImageSharp?.gatsbyImageData;
       }
 
       if(item.elements?.length > 0) item.elements = await transformNode(item.elements, { graphql, reporter });

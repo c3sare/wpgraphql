@@ -3,16 +3,12 @@ import { Link, graphql } from "gatsby"
 import { GatsbyImage } from "gatsby-plugin-image"
 import parse from "html-react-parser"
 
-// We're using Gutenberg so we need the block styles
-// these are copied into this project due to a conflict in the postCSS
-// version used by the Gatsby and @wordpress packages that causes build
-// failures.
-// @todo update this once @wordpress upgrades their postcss version
 import "../css/@wordpress/block-library/build-style/style.css"
 import "../css/@wordpress/block-library/build-style/theme.css"
 
 import Bio from "../components/bio"
 import Layout from "../components/layout"
+
 import Seo from "../components/seo"
 
 const BlogPostTemplate = ({ data: { previous, next, post } }) => {
@@ -23,7 +19,6 @@ const BlogPostTemplate = ({ data: { previous, next, post } }) => {
 
   return (
     <Layout>
-      <Seo title={post.title} description={post.excerpt} />
 
       <article
         className="blog-post"
@@ -86,6 +81,10 @@ const BlogPostTemplate = ({ data: { previous, next, post } }) => {
     </Layout>
   )
 }
+
+export const Head = ({ data: { post } }) => (
+  <Seo title={post.title} description={post.description}/>
+)
 
 export default BlogPostTemplate
 

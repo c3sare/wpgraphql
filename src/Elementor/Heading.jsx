@@ -26,7 +26,7 @@ const Heading = ({ align, title, header_size = "h2", size, link }) => {
     title
   );
 
-  return link.url ? (
+  return link?.url ? (
     <a
       href={link.url}
       target={link.is_external === "on" ? "_blank" : "_self"}
