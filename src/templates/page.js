@@ -21,7 +21,6 @@ const elTypes = {
 }
 
 function generatePage(nodes) {
-
     return nodes.map(node =>
         React.createElement.apply(
             this,
@@ -34,7 +33,7 @@ function generatePage(nodes) {
 }
 
 const PageTemplate = ({ pageContext: {elContent, title, description} }) => {
-  console.log(elContent[0].elements[0].elements[2]);
+  // console.log(elContent[0].elements[0].elements[2]);
 
   return (
     <Layout title={title} description={description}>

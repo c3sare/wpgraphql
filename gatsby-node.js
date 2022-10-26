@@ -18,7 +18,7 @@ exports.createPages = async gatsbyUtilities => {
 
 function getElementorPages(pages, gatsbyUtilities) {
   return Promise.all(pages.map( async item => {
-    if(item.elementorContent.length > 0) item.elementorContent = await transformNode(JSON.parse(item.elementorContent), gatsbyUtilities);
+    if(item.elementorContent.length > 0) item.elementorContent = await transformNode(JSON.parse(JSON.stringify(JSON.parse(item.elementorContent))), gatsbyUtilities);
     else item.elementorContent = [];
     return item;
   })).then(
@@ -136,42 +136,45 @@ async function getPosts({ graphql, reporter }) {
   return graphqlResult.data.allWpPost.edges
 }
 
-const size = {
-  thumbnail: 150,
-  medium: 300,
-  "medium-large": 768,
-  large: 1024,
-  "1536x1536": 1536,
-  "2048x2048": 2048,
-  full: 2048,
-  custom: 0
-};
-
 function transformNode(nodes, { graphql, reporter }) {
   return Promise.all(nodes.map( async item => {
       if(item.elType === "widget" && item.widgetType === "image") {
         const sizeImage = await graphql(`
-          query getImageSize($url: String!, $custom: Boolean!){
-            wpMediaItem(localFile: {url: {eq: $url}}) {
+          query getImageSize($url: String!){
+            wpMediaItem(sourceUrl: {eq: $url}) {
               width
               height
-              gatsbyImage(width: $x, height: $y, formats: WEBP, placeholder: BLURRED) @include (if: $custom)
             }
           }
         `, {
-          url: item.settings.image.url,
-          custom: item.settings.image_size === "custom",
-          x: item.settings.image_custom_dimension.height,
-          y: item.settings.image_custom_dimension.width
+          url: `${item.settings.image.url}`,
         });
+        console.log(item.settings.image.url);
+
+        const size = {
+          thumbnail: 150,
+          medium: 300,
+          "medium-large": 768,
+          large: 1024,
+          "1536x1536": 1536,
+          "2048x2048": 2048,
+          full: sizeImage.data.wpMediaItem.width,
+          custom: 100
+        };
+
+          const heightRatio = sizeImage.data.wpMediaItem.height/sizeImage.data.wpMediaItem.width;
+          const widthRatio = sizeImage.data.wpMediaItem.width/sizeImage.data.wpMediaItem.height;
 
           const query = await graphql(`
-            query getImage($url: String!, $size: Int!, $greater: Boolean!){
-              wpMediaItem(localFile: {url: {eq: $url}}) {
+            query getImage($url: String!, $size: Int!, $greater: Boolean!, $custom: Boolean!, $x: Int!, $y: Int!){
+              wpMediaItem(sourceUrl: {eq: $url}) {
                 gatsbyImage(width: $size, formats: WEBP, placeholder: BLURRED) @include (if: $greater)
                 localFile @skip (if: $greater) {
-                  childImageSharp {
+                  childImageSharp @skip (if: $custom) {
                     gatsbyImageData(height: $size, formats: WEBP, placeholder: BLURRED)
+                  }
+                  childrenImageSharp @include (if: $custom) {
+                    gatsbyImageData(height: $x, width: $y, formats: WEBP, placeholder: BLURRED, transformOptions: {cropFocus: CENTER})
                   }
                 }
               }
@@ -180,8 +183,18 @@ function transformNode(nodes, { graphql, reporter }) {
             url: item.settings.image.url,
             size: size[item.settings?.image_size || "large"],
             greater: item.settings?.image_size === "custom" ? false : sizeImage.data.wpMediaItem.width >= sizeImage.data.wpMediaItem.height,
+            custom: item.settings.image_size === "custom",
+            x: Number(Math.floor(
+              item.settings?.image_custom_dimension?.height ||
+              item.settings?.image_custom_dimension?.width*heightRatio ||
+              sizeImage.data.wpMediaItem.height
+            )),
+            y: Number(Math.floor(
+              item.settings?.image_custom_dimension?.width ||
+              item.settings?.image_custom_dimension?.height*widthRatio ||
+              sizeImage.data.wpMediaItem.width
+            ))
           });
-
 
           if(query.errors) {
             reporter.panicOnBuild(
@@ -191,9 +204,16 @@ function transformNode(nodes, { graphql, reporter }) {
             return item;
           }
 
-          item.settings.image.data =
-            query.data?.wpMediaItem?.gatsbyImage ||
-            query.data?.wpMediaItem?.localFile?.childImageSharp?.gatsbyImageData;
+          if(item.settings.image_size === "custom") {
+            item.settings.image.data = query.data.wpMediaItem.localFile.childrenImageSharp[0].gatsbyImageData;
+            console.log({custom: query.data.wpMediaItem.localFile.childrenImageSharp});
+          } else if(sizeImage.data.wpMediaItem.width >= sizeImage.data.wpMediaItem.height) {
+            item.settings.image.data = query.data.wpMediaItem.gatsbyImage;
+            // console.log({width: query.data.wpMediaItem.gatsbyImage})
+          } else if(sizeImage.data.wpMediaItem.width < sizeImage.data.wpMediaItem.height) {
+            item.settings.image.data = query.data.wpMediaItem.localFile.childImageSharp?.gatsbyImageData;
+            // console.log({height: query.data.wpMediaItem.localFile.childImageSharp?.gatsbyImageData})
+          }
       }
 
       if(item.elements?.length > 0) item.elements = await transformNode(item.elements, { graphql, reporter });

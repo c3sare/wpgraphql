@@ -5,7 +5,12 @@ module.exports = {
       options: {
         url:
           process.env.WPGRAPHQL_URL ||
-          `http://elementor-gatsby-wp.local/graphql`,
+          `http://wp-elementor-gatsby.local/graphql`,
+        type: {
+          MediaItem: {
+            createFileNodes: false,
+          },
+        }
       },
     },
     {

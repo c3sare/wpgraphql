@@ -9,7 +9,7 @@ const alignFlex = {
 };
 
 const Image = ({
-  image: { alt = "", url, data },
+  image,
   align = "center",
   caption = "",
   caption_source = "",
@@ -17,7 +17,8 @@ const Image = ({
   link,
 }) => {
   const dispatch = React.useContext(LightBox)[1];
-  const Img = <GatsbyImage image={data} alt={alt} />;
+  const Img = <GatsbyImage image={image.data} alt={image.alt} />;
+  console.log(image);
   return (
     <div
       style={{
@@ -43,7 +44,7 @@ const Image = ({
               });
             }
           }}
-          href={link_to === "file" ? url : link.url}
+          href={link_to === "file" ? image.url : link.url}
         >
           {Img}
         </a>
