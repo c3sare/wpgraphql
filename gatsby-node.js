@@ -149,7 +149,7 @@ function transformNode(nodes, { graphql, reporter }) {
         `, {
           url: `${item.settings.image.url}`,
         });
-        console.log(item.settings.image.url);
+        console.log(sizeImage.data.wpMediaItem);
 
         const size = {
           thumbnail: 150,
@@ -164,36 +164,37 @@ function transformNode(nodes, { graphql, reporter }) {
 
           const heightRatio = sizeImage.data.wpMediaItem.height/sizeImage.data.wpMediaItem.width;
           const widthRatio = sizeImage.data.wpMediaItem.width/sizeImage.data.wpMediaItem.height;
+          
+          const imageHeight = Math.floor(Number(
+            item.settings?.image_custom_dimension?.height ||
+            item.settings?.image_custom_dimension?.width*heightRatio ||
+            sizeImage.data.wpMediaItem.height
+          ));
+
+          const imageWidth = Math.floor(Number(
+            item.settings?.image_custom_dimension?.width ||
+            item.settings?.image_custom_dimension?.height*widthRatio ||
+            sizeImage.data.wpMediaItem.width
+          ));
 
           const query = await graphql(`
-            query getImage($url: String!, $size: Int!, $greater: Boolean!, $custom: Boolean!, $x: Int!, $y: Int!){
+            query getImage($url: String!, $size: Int!, $greater: Boolean!, $less: Boolean!, $custom: Boolean!, $x: Int!, $y: Int!, $lightbox: Boolean!){
               wpMediaItem(sourceUrl: {eq: $url}) {
-                gatsbyImage(width: $size, formats: WEBP, placeholder: BLURRED) @include (if: $greater)
-                localFile @skip (if: $greater) {
-                  childImageSharp @skip (if: $custom) {
-                    gatsbyImageData(height: $size, formats: WEBP, placeholder: BLURRED)
-                  }
-                  childrenImageSharp @include (if: $custom) {
-                    gatsbyImageData(height: $x, width: $y, formats: WEBP, placeholder: BLURRED, transformOptions: {cropFocus: CENTER})
-                  }
-                }
+                widthimage: gatsbyImage(width: $size, formats: WEBP, placeholder: BLURRED) @include (if: $greater)
+                heightimage: gatsbyImage(height: $size, formats: WEBP, placeholder: BLURRED) @include (if: $less)
+                customimage: gatsbyImage(width: $y, height: $x, formats: WEBP, placeholder: BLURRED, cropFocus: CENTER) @include (if: $custom)
+                publicUrl @include (if: $lightbox)
               }
             }
           `, {
             url: item.settings.image.url,
             size: size[item.settings?.image_size || "large"],
-            greater: item.settings?.image_size === "custom" ? false : sizeImage.data.wpMediaItem.width >= sizeImage.data.wpMediaItem.height,
-            custom: item.settings.image_size === "custom",
-            x: Number(Math.floor(
-              item.settings?.image_custom_dimension?.height ||
-              item.settings?.image_custom_dimension?.width*heightRatio ||
-              sizeImage.data.wpMediaItem.height
-            )),
-            y: Number(Math.floor(
-              item.settings?.image_custom_dimension?.width ||
-              item.settings?.image_custom_dimension?.height*widthRatio ||
-              sizeImage.data.wpMediaItem.width
-            ))
+            greater: item.settings?.image_size === "custom" || item.settings?.image_size === "thumbnail" ? false : sizeImage.data.wpMediaItem.width >= sizeImage.data.wpMediaItem.height,
+            less: item.settings?.image_size === "custom" || item.settings?.image_size === "thumbnail" ? false : sizeImage.data.wpMediaItem.width < sizeImage.data.wpMediaItem.height,
+            custom: item.settings.image_size === "custom" || item.settings?.image_size === "thumbnail",
+            x: item.settings?.image_size === "thumbnail" ? 150 : imageHeight,
+            y: item.settings?.image_size === "thumbnail" ? 150 : imageWidth,
+            lightbox: item.settings?.link_to === "file"
           });
 
           if(query.errors) {
@@ -204,16 +205,13 @@ function transformNode(nodes, { graphql, reporter }) {
             return item;
           }
 
-          if(item.settings.image_size === "custom") {
-            item.settings.image.data = query.data.wpMediaItem.localFile.childrenImageSharp[0].gatsbyImageData;
-            console.log({custom: query.data.wpMediaItem.localFile.childrenImageSharp});
-          } else if(sizeImage.data.wpMediaItem.width >= sizeImage.data.wpMediaItem.height) {
-            item.settings.image.data = query.data.wpMediaItem.gatsbyImage;
-            // console.log({width: query.data.wpMediaItem.gatsbyImage})
-          } else if(sizeImage.data.wpMediaItem.width < sizeImage.data.wpMediaItem.height) {
-            item.settings.image.data = query.data.wpMediaItem.localFile.childImageSharp?.gatsbyImageData;
-            // console.log({height: query.data.wpMediaItem.localFile.childImageSharp?.gatsbyImageData})
-          }
+          item.settings.image.data =
+            query.data.wpMediaItem.widthimage ||
+            query.data.wpMediaItem.heightimage ||
+            query.data.wpMediaItem.customimage;
+
+          if(query.data.wpMediaItem?.publicUrl) item.settings.image.fullSizeUrl = query.data.wpMediaItem.publicUrl;
+
       }
 
       if(item.elements?.length > 0) item.elements = await transformNode(item.elements, { graphql, reporter });

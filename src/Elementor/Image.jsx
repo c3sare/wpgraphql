@@ -8,17 +8,20 @@ const alignFlex = {
   right: "end",
 };
 
-const Image = ({
-  image,
-  align = "center",
-  caption = "",
-  caption_source = "",
-  link_to = "",
-  link,
-}) => {
+const Image = (props) => {
+  const {
+    image,
+    align = "center",
+    caption = "",
+    caption_source = "",
+    link_to = "",
+    link,
+    open_lightbox,
+  } = props;
+  console.log(props);
+
   const dispatch = React.useContext(LightBox)[1];
   const Img = <GatsbyImage image={image.data} alt={image.alt} />;
-  console.log(image);
   return (
     <div
       style={{
@@ -31,12 +34,15 @@ const Image = ({
       {link_to === "custom" || link_to === "file" ? (
         <a
           rel="noreferrer"
-          target={link.is_external ? "_blank" : "_self"}
+          target={open_lightbox === "no" ? "_blank" : "_self"}
           style={{
             overflow: "hidden",
           }}
           onClick={(e) => {
-            if (link_to === "file") {
+            if (
+              (link_to === "file" && open_lightbox === "yes") ||
+              (link_to === "file" && !open_lightbox)
+            ) {
               e.preventDefault();
               dispatch({
                 type: "open",
@@ -44,7 +50,7 @@ const Image = ({
               });
             }
           }}
-          href={link_to === "file" ? image.url : link.url}
+          href={link_to === "file" ? image.fullSizeUrl : link.url}
         >
           {Img}
         </a>
