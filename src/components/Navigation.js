@@ -59,7 +59,7 @@ function createMenu(nodes) {
 const Navigation = () => {
     const menuItems = flatListToHierarchical(useStaticQuery(graphql`
     {
-        allWpMenuItem(filter: {locations: {eq: MENU_1}}) {
+        allWpMenuItem(filter: {locations: {eq: GATSBY_HEADER_MENU}}) {
           nodes {
             key: id
             parentId

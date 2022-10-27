@@ -10,7 +10,7 @@ module.exports = {
         url: `${process.env.WP_URL}graphql`,
         type: {
           MediaItem: {
-            createFileNodes: true,
+            createFileNodes: false,
           },
         }
       },
@@ -41,6 +41,13 @@ module.exports = {
       resolve: `gatsby-plugin-styled-components`,
       options: {
         // Add any options here
+      },
+    },
+    {
+      resolve: `gatsby-plugin-remote-images`,
+      options: {
+        nodeType: 'Wp',
+        imagePath: 'logo',
       },
     },
   ],

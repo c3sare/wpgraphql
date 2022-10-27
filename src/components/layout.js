@@ -1,5 +1,6 @@
 import React from "react"
-import { graphql, Link, useStaticQuery } from "gatsby"
+import { graphql, Link, useStaticQuery } from "gatsby";
+import { GatsbyImage } from "gatsby-plugin-image";
 import Navigation from "./Navigation";
 import Lightbox from "react-image-lightbox";
 
@@ -42,21 +43,32 @@ export const LightBox = React.createContext(initialState);
 
 const Layout = ({isHomePage, children}) => {
   const [state, dispatch] = React.useReducer(reducer, initialState);
-  const logo = useStaticQuery(graphql`
+  const data = useStaticQuery(graphql`
     query Main {
-      wpMediaItem(slug: {eq: "logo"}) {
-        gatsbyImage(width: 200)
+      wp {
+        generalSettings {
+          title
+        }
+        localImage {
+          childImageSharp {
+            gatsbyImageData(width: 200, formats: WEBP, quality: 100, placeholder: NONE)
+          }
+        }
       }
     }
   `);
-  console.log(logo);
 
   return (
     <LightBox.Provider value={[state, dispatch]}>
       <div className="global-wrapper" data-is-root-path={isHomePage}>
         <header className="global-header">
           <Link to="/">
-            {/* <GatsbyImage image={logo} alt="Logo"/> */}
+            {
+              data.wp.localImage?.childImageSharp?.gatsbyImageData ?
+                <GatsbyImage image={data.wp.localImage?.childImageSharp?.gatsbyImageData} alt="Logo"/>
+              :
+                data.wp.generalSettings.title
+            }
           </Link>
           <Navigation/>
         </header>
