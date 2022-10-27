@@ -20,20 +20,18 @@ const elTypes = {
     "text-editor": TextEditor,
 }
 
-function generatePage(nodes) {
+const PageTemplate = ({ pageContext: {elContent, title, description}, location }) => {
+  function generatePage(nodes) {
     return nodes.map(node =>
         React.createElement.apply(
             this,
             [
                 elTypes[node.elType === 'widget' ? node.widgetType : node.elType],
-                {...node.settings, key: node.id}
+                {...node.settings, key: node.id, location}
             ]
         .concat(node.elements.length > 0 ? generatePage(node.elements) : [])
     ));
 }
-
-const PageTemplate = ({ pageContext: {elContent, title, description} }) => {
-  // console.log(elContent[0].elements[0].elements[2]);
 
   return (
     <Layout title={title} description={description}>

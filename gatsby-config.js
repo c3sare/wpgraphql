@@ -1,14 +1,16 @@
+require("dotenv").config({
+  path: `.env`,
+})
+
 module.exports = {
   plugins: [
     {
       resolve: `gatsby-source-wordpress`,
       options: {
-        url:
-          process.env.WPGRAPHQL_URL ||
-          `http://elementor-gatsby-wp.local/graphql`,
+        url: `${process.env.WP_URL}graphql`,
         type: {
           MediaItem: {
-            createFileNodes: false,
+            createFileNodes: true,
           },
         }
       },
@@ -33,6 +35,12 @@ module.exports = {
         theme_color: `#663399`,
         display: `minimal-ui`,
         icon: `content/assets/gatsby-icon.png`,
+      },
+    },
+    {
+      resolve: `gatsby-plugin-styled-components`,
+      options: {
+        // Add any options here
       },
     },
   ],

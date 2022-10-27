@@ -1,5 +1,8 @@
 const path = require(`path`)
 const chunk = require(`lodash/chunk`);
+require("dotenv").config({
+  path: `.env`,
+})
 
 exports.createPages = async gatsbyUtilities => {
   const posts = await getPosts(gatsbyUtilities);
@@ -212,6 +215,13 @@ function transformNode(nodes, { graphql, reporter }) {
 
           if(query.data.wpMediaItem?.publicUrl) item.settings.image.fullSizeUrl = query.data.wpMediaItem.publicUrl;
 
+      }
+      
+      if(item.elType === "widget" && item.settings.link) {
+        if(item.settings?.link?.url && item.settings?.link?.url.indexOf(process.env.WP_URL) === 0) {
+          const url = item.settings.link.url
+          item.settings.link.url = url.slice(url.indexOf(process.env.WP_URL)+process.env.WP_URL.length-1)
+        }
       }
 
       if(item.elements?.length > 0) item.elements = await transformNode(item.elements, { graphql, reporter });
