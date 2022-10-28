@@ -52,7 +52,7 @@ const createIndividualBlogPostPages = async ({ posts, gatsbyUtilities }) =>
   Promise.all(
     posts.map(({ previous, post, next }) =>
       gatsbyUtilities.actions.createPage({
-        path: post.uri,
+        path: "/post"+post.uri,
         component: path.resolve(`./src/templates/blog-post.js`),
         context: {
           id: post.id,
@@ -85,7 +85,7 @@ async function createBlogPostArchive({ posts, gatsbyUtilities }) {
 
       const getPagePath = page => {
         if (page > 0 && page <= totalPages) {
-          return page === 1 ? `/` : `/blog/${page}`
+          return page === 1 ? `/blog` : `/blog/${page}`
         }
 
         return null
