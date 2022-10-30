@@ -2,6 +2,7 @@ import { Link } from "gatsby";
 import { GatsbyImage } from "gatsby-plugin-image";
 import React from "react";
 import { LightBox } from "../components/layout";
+import styled from "styled-components";
 
 const alignFlex = {
   left: "start",
@@ -14,14 +15,40 @@ const Image = (props) => {
   const {
     image,
     align = "center",
+    align_mobile,
+    align_tablet,
     caption = "",
     caption_source = "",
     link_to = "",
     link = { url: "" },
-    open_lightbox,
+    open_lightbox = "yes",
     location,
   } = props;
   console.log(props);
+
+  const Container = styled.div`
+    display: flex;
+    flex-direction: column;
+
+    @media (min-width: 1024px) {
+      text-align: ${align};
+      align-items: ${alignFlex[align]};
+    }
+
+    @media (max-width: 1023.99px and min-width: 768px) {
+      text-align: ${align_tablet || align};
+      align-items: ${alignFlex[align_tablet || align]};
+    }
+
+    @media (max-width: 767.99px) {
+      text-align: ${align_mobile || align};
+      align-items: ${alignFlex[align_mobile || align]};
+    }
+  `;
+
+  const Caption = styled.span`
+    color: grey;
+  `;
 
   React.useEffect(() => {
     const checkDomain = function (url) {
@@ -55,14 +82,8 @@ const Image = (props) => {
     <a
       rel="noreferrer"
       target={open_lightbox === "no" ? "_blank" : "_self"}
-      style={{
-        overflow: "hidden",
-      }}
       onClick={(e) => {
-        if (
-          (link_to === "file" && open_lightbox === "yes") ||
-          (link_to === "file" && !open_lightbox)
-        ) {
+        if (link_to === "file" && open_lightbox === "yes") {
           e.preventDefault();
           dispatch({
             type: "open",
@@ -79,33 +100,18 @@ const Image = (props) => {
   const notExternal = <Link to={link?.url}>{Img}</Link>;
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        textAlign: align,
-        alignItems: alignFlex[align],
-      }}
-    >
+    <Container>
       {link_to === "custom" || link_to === "file" ? (
-        external ? (
+        external || link_to === "file" ? (
           externalOrImage
         ) : (
           notExternal
         )
       ) : (
-        <div
-          style={{
-            overflow: "hidden",
-          }}
-        >
-          {Img}
-        </div>
+        <div>{Img}</div>
       )}
-      {caption_source === "custom" && (
-        <span style={{ color: "grey" }}>{caption}</span>
-      )}
-    </div>
+      {caption_source === "custom" && <Caption>{caption}</Caption>}
+    </Container>
   );
 };
 

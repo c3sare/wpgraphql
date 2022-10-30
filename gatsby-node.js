@@ -21,7 +21,7 @@ exports.createPages = async gatsbyUtilities => {
 
 function getElementorPages(pages, gatsbyUtilities) {
   return Promise.all(pages.map( async item => {
-    if(item.elementorContent.length > 0) item.elementorContent = await transformNode(JSON.parse(JSON.stringify(JSON.parse(item.elementorContent))), gatsbyUtilities);
+    if(item.elementorContent?.length > 0) item.elementorContent = await transformNode(JSON.parse(item.elementorContent), gatsbyUtilities);
     else item.elementorContent = [];
     return item;
   })).then(

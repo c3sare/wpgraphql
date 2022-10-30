@@ -8,7 +8,17 @@ const sizeHeader = {
   xxl: 59,
 };
 
-const Heading = ({ align, title, header_size = "h2", size, link }) => {
+const Heading = (props) => {
+  const {
+    align,
+    align_mobile,
+    align_tablet,
+    title,
+    header_size = "h2",
+    size,
+    link,
+  } = props;
+
   const textSize = sizeHeader[size]
     ? {
         fontSize: `${sizeHeader[size]}px`,
