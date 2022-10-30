@@ -1,4 +1,5 @@
 import React from "react";
+import styled from "styled-components";
 
 const sizeHeader = {
   small: 15,
@@ -19,21 +20,58 @@ const Heading = (props) => {
     link,
   } = props;
 
-  const textSize = sizeHeader[size]
-    ? {
-        fontSize: `${sizeHeader[size]}px`,
-      }
-    : {};
+  console.log(props);
 
-  const textElement = React.createElement(
-    header_size,
-    {
-      style: {
-        textAlign: align,
-        ...textSize,
-      },
-    },
-    title
+  const StyledHeader = styled[header_size]`
+    ${(props) =>
+      props.size
+        ? `
+      font-size: ${props.sizeHeader[props.size]}px;
+    `
+        : ""}
+    ${(props) =>
+      (props.align && !props.align_tablet) ||
+      (props.align && !props.align_mobile)
+        ? `
+      text-align: ${props.align}
+    `
+        : ""}
+
+    ${(props) =>
+      (props.align && props.align_mobile) || (props.align && props.align_tablet)
+        ? `
+      @media (min-width: 1024px) {
+        text-align: ${props.align};
+      }`
+        : ""}
+
+    ${(props) =>
+      props.align_tablet
+        ? `
+      @media (max-width: 1023.99px and min-width: 768px) {
+        text-align: ${props.align_tablet || props.align};
+      }`
+        : ""}
+
+    ${(props) =>
+      props.align_mobile
+        ? `
+      @media (max-width: 767.99px) {
+        text-align: ${props.align_mobile || props.align};
+      }`
+        : ""}
+  `;
+
+  const heading = (
+    <StyledHeader
+      size={size}
+      sizeHeader={sizeHeader}
+      align={align}
+      align_mobile={align_mobile}
+      align_tablet={align_tablet}
+    >
+      {title}
+    </StyledHeader>
   );
 
   return link?.url ? (
@@ -42,10 +80,10 @@ const Heading = (props) => {
       target={link.is_external === "on" ? "_blank" : "_self"}
       rel="noreferrer"
     >
-      {textElement}
+      {heading}
     </a>
   ) : (
-    textElement
+    heading
   );
 };
 

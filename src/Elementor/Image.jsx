@@ -10,6 +10,32 @@ const alignFlex = {
   right: "end",
 };
 
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+
+  @media (min-width: 1024px) {
+    text-align: ${(props) => props.align};
+    align-items: ${(props) => props.alignFlex[props.align]};
+  }
+
+  @media (max-width: 1023.99px and min-width: 768px) {
+    text-align: ${(props) => props.align_tablet || props.align};
+    align-items: ${(props) =>
+      props.alignFlex[props.align_tablet || props.align]};
+  }
+
+  @media (max-width: 767.99px) {
+    text-align: ${(props) => props.align_mobile || props.align};
+    align-items: ${(props) =>
+      props.alignFlex[props.align_mobile || props.align]};
+  }
+`;
+
+const Caption = styled.span`
+  color: grey;
+`;
+
 const Image = (props) => {
   const [external, setExternal] = React.useState(false);
   const {
@@ -25,30 +51,6 @@ const Image = (props) => {
     location,
   } = props;
   console.log(props);
-
-  const Container = styled.div`
-    display: flex;
-    flex-direction: column;
-
-    @media (min-width: 1024px) {
-      text-align: ${align};
-      align-items: ${alignFlex[align]};
-    }
-
-    @media (max-width: 1023.99px and min-width: 768px) {
-      text-align: ${align_tablet || align};
-      align-items: ${alignFlex[align_tablet || align]};
-    }
-
-    @media (max-width: 767.99px) {
-      text-align: ${align_mobile || align};
-      align-items: ${alignFlex[align_mobile || align]};
-    }
-  `;
-
-  const Caption = styled.span`
-    color: grey;
-  `;
 
   React.useEffect(() => {
     const checkDomain = function (url) {
@@ -100,7 +102,12 @@ const Image = (props) => {
   const notExternal = <Link to={link?.url}>{Img}</Link>;
 
   return (
-    <Container>
+    <Container
+      align={align}
+      alignFlex={alignFlex}
+      align_tablet={align_tablet}
+      align_mobile={align_mobile}
+    >
       {link_to === "custom" || link_to === "file" ? (
         external || link_to === "file" ? (
           externalOrImage
