@@ -11,6 +11,7 @@ import Image from '../Elementor/Image';
 import TextEditor from "../Elementor/TextEditor";
 
 import Seo from "../components/seo";
+import Video from "../Elementor/Video";
 
 const elTypes = {
     "section": Section,
@@ -18,6 +19,7 @@ const elTypes = {
     "heading": Heading,
     "image": Image,
     "text-editor": TextEditor,
+    "video": Video
 }
 
 const PageTemplate = ({ pageContext: {elContent, title, description}, location }) => {
@@ -36,7 +38,7 @@ const PageTemplate = ({ pageContext: {elContent, title, description}, location }
   return (
     <Layout title={title} description={description}>
       <h1>{title}</h1>
-      {generatePage(elContent.slice(0, 2))}
+      {generatePage(elContent)}
     </Layout>
   )
 }

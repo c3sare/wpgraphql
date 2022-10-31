@@ -1,5 +1,30 @@
 import React from "react";
 import styled from "styled-components";
+import { device } from "../mediaquery/size";
+
+const TextEditorStyled = styled.div`
+  columns: ${(props) => props.text_columns};
+
+  @media ${device.laptop} {
+    column-gap: ${(props) => props.column_gap?.size || 0}${(props) => props.column_gap?.unit || "px"};
+  }
+
+  @media ${device.tablet} {
+    column-gap: ${(props) => props.column_gap_tablet?.size || 0}${(props) => props.column_gap_mobile?.unit || "px"};
+  }
+
+  @media ${device.mobile} {
+    column-gap: ${(props) => props.column_gap_mobile?.size || 0}${(props) => props.column_gap_mobile?.unit || "px"};
+  }
+
+  ${props => props.drop_cap === "yes" &&
+  `p:first-child:first-letter {
+    float: left;
+    text-align: center;
+    line-height: 1;
+    font-size: 50px;
+  }`}
+`;
 
 const TextEditor = (props) => {
   const {
@@ -11,29 +36,6 @@ const TextEditor = (props) => {
     drop_cap,
   } = props;
 
-  const TextEditorStyled = styled.div`
-    columns: ${(props) => props.text_columns};
-
-    @media (min-width: 1024px) {
-      column-gap: ${(props) => props.column_gap?.size || 0}${(props) => props.column_gap?.unit || "px"};
-    }
-
-    @media (max-width: 1023.99px and min-width: 768px) {
-      column-gap: ${(props) => props.column_gap_tablet?.size || 0}${(props) => props.column_gap_mobile?.unit || "px"};
-    }
-
-    @media (max-width: 767.99px) {
-      column-gap: ${(props) => props.column_gap_mobile?.size || 0}${(props) => props.column_gap_mobile?.unit || "px"};
-    }
-
-    ${drop_cap === "yes" &&
-    `p:first-child:first-letter {
-            float: left;
-            text-align: center;
-            line-height: 1;
-            font-size: 50px;
-        }`}
-  `;
   console.log(props);
 
   return (

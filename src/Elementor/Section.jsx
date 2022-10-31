@@ -1,11 +1,13 @@
-import React from "react";
+import styled from "styled-components";
 
-const Section = ({ children }) => {
-  return (
-    <div style={{ width: "100%", display: "flex", padding: "5px" }}>
-      {children}
-    </div>
-  );
-};
+const Section = styled.div`
+  width: 100%;
+  display: flex;
+  padding: 5px;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+`;
 
 export default Section;

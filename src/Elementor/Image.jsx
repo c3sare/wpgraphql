@@ -3,6 +3,7 @@ import { GatsbyImage } from "gatsby-plugin-image";
 import React from "react";
 import { LightBox } from "../components/layout";
 import styled from "styled-components";
+import { device } from "../mediaquery/size";
 
 const alignFlex = {
   left: "start",
@@ -13,23 +14,25 @@ const alignFlex = {
 const Container = styled.div`
   display: flex;
   flex-direction: column;
+  ${props => (!props.align_mobile || !props.align_tablet) ? `
+    text-align: ${props.align};
+    align-items: ${props.alignFlex[props.align]};
+  ` : ""}
 
-  @media (min-width: 1024px) {
-    text-align: ${(props) => props.align};
-    align-items: ${(props) => props.alignFlex[props.align]};
-  }
+  ${props => (props.align_mobile && props.align_tablet) ? `@media ${device.laptop} {
+    text-align: ${props.align};
+    align-items: ${props.alignFlex[props.align]};
+  }` : ""}
 
-  @media (max-width: 1023.99px and min-width: 768px) {
-    text-align: ${(props) => props.align_tablet || props.align};
-    align-items: ${(props) =>
-      props.alignFlex[props.align_tablet || props.align]};
-  }
+  ${props => props.align_tablet ? `@media ${device.tablet} {
+    text-align: ${props.align_tablet || props.align};
+    align-items: ${props.alignFlex[props.align_tablet || props.align]};
+  }` : ""}
 
-  @media (max-width: 767.99px) {
-    text-align: ${(props) => props.align_mobile || props.align};
-    align-items: ${(props) =>
-      props.alignFlex[props.align_mobile || props.align]};
-  }
+  ${props => props.align_mobile ? `@media ${device.mobile} {
+    text-align: ${props.align_mobile || props.align};
+    align-items: ${props.alignFlex[props.align_mobile || props.align]};
+  }` : ""}
 `;
 
 const Caption = styled.span`

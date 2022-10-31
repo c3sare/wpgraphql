@@ -1,19 +1,15 @@
-import React from "react";
+import styled from "styled-components";
 
-const Column = ({ children, _column_size, _inline_size }) => {
-  return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        width: `${_column_size}%`,
-        padding: "5px",
-        overflow: "hidden",
-      }}
-    >
-      {children}
-    </div>
-  );
-};
+const ColumnStyle = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: ${props => props._column_size}%;
+  padding: 5px;
+  overflow: hidden;
 
-export default Column;
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+`;
+
+export default ColumnStyle;
