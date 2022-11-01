@@ -1,87 +1,218 @@
-import React from 'react';
-import styled from 'styled-components';
+import { GatsbyImage } from "gatsby-plugin-image";
+import React from "react";
+import styled, { keyframes } from "styled-components";
+import PlayIcon from "../images/play.svg";
+import CloseIcon from "../images/close.svg";
+import ReactPlayer from "react-player";
+import ReactPlayerLazy from "react-player/lazy";
 
-const IFrameYoutube = styled.iframe`
-    max-width: 100%;
-    width: 100%;
-    margin: 0;
-    line-height: 1;
-    border: none;
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 100%;
-    border: 0;
-    background-color: #000;
-}
+const stylePlayer = `
+  max-width: 100%;
+  width: 100%;
+  margin: 0;
+  line-height: 1;
+  border: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  border: 0;
+  background-color: #000;
+`;
+
+const fadeIn = keyframes`
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+`;
+
+const LightBoxVideo = styled.div`
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  animation: ${fadeIn} 0.4s forwards ease-in;
+`;
+
+const ReactPlayerStyled = styled(ReactPlayer)`
+  ${stylePlayer}
+`;
+
+const ReactPlayerLazyStyled = styled(ReactPlayerLazy)`
+  ${stylePlayer}
 `;
 
 const VideoContainer = styled.div`
-    padding-bottom: 56.25%;
-    position: relative;
+  padding-bottom: 56.25%;
+  position: relative;
+`;
+
+const VideoContainerLightbox = styled.div`
+  width: 75%;
+  padding-bottom: 46.25%;
+  position: relative;
+
+  @media (max-width: 768px) {
+    padding-bottom: 66.25%;
+    width: 100%;
+  }
+`;
+
+const CloseLightBox = styled(CloseIcon)`
+  fill: white;
+  width: 32px;
+  height: 32px;
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  cursor: pointer;
+`;
+
+const PlayIconStyled = styled(PlayIcon)`
+  position: absolute;
+  width: 120px;
+  top: calc(50% - 60px);
+  left: calc(50% - 60px);
+`;
+
+const VideoOverlay = styled.div`
+  display: block;
+  width: 100%;
+  cursor: pointer;
+  height: 100%;
+  position: absolute;
 `;
 
 const Video = (props) => {
-    const {
-        youtube_url,
-        vimeo_url,
-        dailymotion_url,
-        autoplay,
-        controls="yes",
-        start=0,
-        end,
-        loop,
-        modestbranding,
-        mute,
-        yt_privacy,
-        lazy_load,
-        image_overlay,
-        image_overlay_size,
-        location
-    } = props;
+  const [showOverlay, setShowOverlay] = React.useState(true);
+  const {
+    youtube_url,
+    vimeo_url,
+    dailymotion_url,
+    autoplay,
+    controls = "yes",
+    start = 0,
+    end,
+    loop,
+    modestbranding,
+    mute,
+    rel,
+    lazy_load,
+    video_type = "youtube",
+    image_overlay,
+    show_image_overlay,
+    // play_icon,
+    hosted_url,
+    vimeo_byline = "yes",
+    vimeo_portrait = "yes",
+    vimeo_title = "yes",
+    color = "#FFFFFF",
+    logo = "yes",
+    showinfo = "yes",
+    lightbox,
+  } = props;
 
-    function youtube_parser(url){
-        var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
-        var match = url.match(regExp);
-        return (match&&match[7].length===11)? match[7] : false;
+  const videoUrl = {
+    youtube: youtube_url,
+    vimeo: vimeo_url,
+    dailymotion: dailymotion_url,
+    hosted: hosted_url.url,
+  };
+
+  const playerConfig = {
+    youtube: {
+      youtube: {
+        playerVars: {
+          rel: rel === "yes" ? 0 : 1,
+          start,
+          end: end ? end : 0,
+          autoplay: Number(autoplay === "yes" || show_image_overlay === "yes"),
+          modestbranding: Number(modestbranding === "yes"),
+        },
+      },
+    },
+    vimeo: {
+      vimeo: {
+        playerOptions: {
+          color: color,
+          byline: vimeo_byline === "yes",
+          portrait: vimeo_portrait === "yes",
+          title: vimeo_title === "yes",
+          autoplay: Number(autoplay === "yes" || show_image_overlay === "yes"),
+        },
+      },
+    },
+    dailymotion: {
+      dailymotion: {
+        params: {
+          start,
+          "ui-logo": logo === "yes",
+          "ui-highlight	": color,
+          "ui-start-screen-info": showinfo === "yes",
+          autoplay: Number(autoplay === "yes" || show_image_overlay === "yes"),
+        },
+      },
+    },
+    hosted: {
+      file: {
+        attributes: {
+          controlsList: "nodownload",
+          autoPlay: autoplay === "yes" || show_image_overlay === "yes",
+        },
+      },
+    },
+  };
+
+  const video = React.createElement(
+    lazy_load === "yes" && video_type !== "hosted"
+      ? ReactPlayerLazyStyled
+      : ReactPlayerStyled,
+    {
+      config: playerConfig[video_type],
+      width: "100%",
+      height: "100%",
+      controls: controls === "yes",
+      loop: loop === "yes",
+      muted: mute === "yes",
+      url: videoUrl[video_type],
     }
-    
-    console.log(props);
-    return (
-        <VideoContainer>
-            <IFrameYoutube
-                loading={lazy_load === "yes" ? "lazy" : "eager"}
-                frameBorder="0"
-                allowFullScreen="1"
-                href={youtube_url}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                title="Video Placeholder"
-                width="640"
-                height="360"
-                src={`https://www.youtube${yt_privacy === "yes" ? "-nocookie" : ""}.com/embed/${
-                    youtube_parser(youtube_url)
-                }?controls=${controls === "yes" ? 1 : 0}&rel=0&playsinline=1&modestbranding=${
-                    modestbranding === "yes"
-                    ? 1 : 0
-                }&autoplay=${
-                    autoplay === "yes"
-                    ? 1 : 0
-                }&start=${
-                    start
-                }${
-                    end ? `&end=${end}` : ""
-                }&enablejsapi=1&origin=${
-                    location.origin
-                }&widgetid=1${
-                    mute ?
-                        "&mute=1"
-                    : ""
-                }${loop === "yes" ? "&playlist="+youtube_parser(youtube_url)+"&loop=1" : ""}`}
-            />
-        </VideoContainer>
-    )
+  );
 
-}
+  console.log(props);
+  return (
+    <VideoContainer>
+      {(!showOverlay || !show_image_overlay) &&
+        (lightbox === "yes" ? (
+          <>
+            <LightBoxVideo onClick={() => setShowOverlay(true)}>
+              <VideoContainerLightbox>{video}</VideoContainerLightbox>
+              <CloseLightBox onClick={() => setShowOverlay(true)} />
+            </LightBoxVideo>
+          </>
+        ) : (
+          video
+        ))}
+      {((show_image_overlay === "yes" && showOverlay) ||
+        lightbox === "yes") && (
+        <VideoOverlay onClick={() => setShowOverlay(false)}>
+          <GatsbyImage image={image_overlay.data} alt="Film" />
+          <PlayIconStyled />
+        </VideoOverlay>
+      )}
+    </VideoContainer>
+  );
+};
 
 export default Video;

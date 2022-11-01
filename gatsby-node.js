@@ -215,6 +215,74 @@ function transformNode(nodes, { graphql, reporter }) {
 
           if(query.data.wpMediaItem?.publicUrl) item.settings.image.fullSizeUrl = query.data.wpMediaItem.publicUrl;
 
+      } else if(item.widgetType === "video" && item.elType === "widget" ) {
+        const sizeImage = await graphql(`
+          query getImageSize($url: String!){
+            wpMediaItem(sourceUrl: {eq: $url}) {
+              width
+              height
+            }
+          }
+        `, {
+          url: `${item.settings.image_overlay.url}`,
+        });
+
+        const size = {
+          thumbnail: 150,
+          medium: 300,
+          "medium-large": 768,
+          large: 1024,
+          "1536x1536": 1536,
+          "2048x2048": 2048,
+          full: sizeImage.data.wpMediaItem.width,
+          custom: 100
+        };
+
+        const heightRatio = sizeImage.data.wpMediaItem.height/sizeImage.data.wpMediaItem.width;
+        const widthRatio = sizeImage.data.wpMediaItem.width/sizeImage.data.wpMediaItem.height;
+        
+        const imageHeight = Math.floor(Number(
+          item.settings?.image_custom_dimension?.height ||
+          item.settings?.image_custom_dimension?.width*heightRatio ||
+          sizeImage.data.wpMediaItem.height
+        ));
+
+        const imageWidth = Math.floor(Number(
+          item.settings?.image_custom_dimension?.width ||
+          item.settings?.image_custom_dimension?.height*widthRatio ||
+          sizeImage.data.wpMediaItem.width
+        ));
+
+        const query = await graphql(`
+          query getImage($url: String!, $size: Int!, $greater: Boolean!, $less: Boolean!, $custom: Boolean!, $x: Int!, $y: Int!){
+            wpMediaItem(sourceUrl: {eq: $url}) {
+              widthimage: gatsbyImage(width: $size, formats: WEBP, placeholder: BLURRED) @include (if: $greater)
+              heightimage: gatsbyImage(height: $size, formats: WEBP, placeholder: BLURRED) @include (if: $less)
+              customimage: gatsbyImage(width: $y, height: $x, formats: WEBP, placeholder: BLURRED, cropFocus: CENTER) @include (if: $custom)
+            }
+          }
+        `, {
+          url: item.settings.image_overlay.url,
+          size: size[item.settings?.image_overlay_size || "large"],
+          greater: item.settings?.image_overlay_size === "custom" || item.settings?.image_overlay_size === "thumbnail" ? false : sizeImage.data.wpMediaItem.width >= sizeImage.data.wpMediaItem.height,
+          less: item.settings?.image_overlay_size === "custom" || item.settings?.image_overlay_size === "thumbnail" ? false : sizeImage.data.wpMediaItem.width < sizeImage.data.wpMediaItem.height,
+          custom: item.settings.image_overlay_size === "custom" || item.settings?.image_overlay_size === "thumbnail",
+          x: item.settings?.image_overlay_size === "thumbnail" ? 150 : imageHeight,
+          y: item.settings?.image_overlay_size === "thumbnail" ? 150 : imageWidth,
+        });
+
+        if(query.errors) {
+          reporter.panicOnBuild(
+            `There was an error loading your pages`,
+            query.errors
+          )
+          return item;
+        }
+
+        item.settings.image_overlay.data =
+          query.data.wpMediaItem.widthimage ||
+          query.data.wpMediaItem.heightimage ||
+          query.data.wpMediaItem.customimage;
       }
       
       if(item.elType === "widget" && item.settings.link) {
