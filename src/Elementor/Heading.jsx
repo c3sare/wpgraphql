@@ -92,8 +92,6 @@ const Heading = (props) => {
         checkDomain(location.href) !== checkDomain(url)
       );
     };
-    console.log(link?.url);
-    console.log(isExternal(link?.url));
 
     if (isExternal(link?.url)) {
       setExternal(true);

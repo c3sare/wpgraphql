@@ -36,8 +36,6 @@ const TextEditor = (props) => {
     drop_cap,
   } = props;
 
-  console.log(props);
-
   return (
     <TextEditorStyled
       text_columns={text_columns}

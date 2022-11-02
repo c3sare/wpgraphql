@@ -53,7 +53,6 @@ const Image = (props) => {
     open_lightbox = "yes",
     location,
   } = props;
-  console.log(props);
 
   React.useEffect(() => {
     const checkDomain = function (url) {
@@ -72,8 +71,6 @@ const Image = (props) => {
         checkDomain(location.href) !== checkDomain(url)
       );
     };
-    console.log(link?.url);
-    console.log(isExternal(link?.url));
 
     if (isExternal(link?.url)) {
       setExternal(true);

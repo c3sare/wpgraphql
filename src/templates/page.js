@@ -12,6 +12,8 @@ import TextEditor from "../Elementor/TextEditor";
 
 import Seo from "../components/seo";
 import Video from "../Elementor/Video";
+import Button from "../Elementor/Button";
+import Divider from "../Elementor/Divider";
 
 const elTypes = {
     "section": Section,
@@ -19,7 +21,9 @@ const elTypes = {
     "heading": Heading,
     "image": Image,
     "text-editor": TextEditor,
-    "video": Video
+    "video": Video,
+    "button": Button,
+    "divider": Divider
 }
 
 const PageTemplate = ({ pageContext: {elContent, title, description}, location }) => {

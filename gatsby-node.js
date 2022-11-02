@@ -52,7 +52,7 @@ const createIndividualBlogPostPages = async ({ posts, gatsbyUtilities }) =>
   Promise.all(
     posts.map(({ previous, post, next }) =>
       gatsbyUtilities.actions.createPage({
-        path: "/post"+post.uri,
+        path: post.uri,
         component: path.resolve(`./src/templates/blog-post.js`),
         context: {
           id: post.id,
@@ -152,7 +152,6 @@ function transformNode(nodes, { graphql, reporter }) {
         `, {
           url: `${item.settings.image.url}`,
         });
-        console.log(sizeImage.data.wpMediaItem);
 
         const size = {
           thumbnail: 150,

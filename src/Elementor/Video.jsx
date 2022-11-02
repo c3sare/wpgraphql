@@ -5,6 +5,8 @@ import PlayIcon from "../images/play.svg";
 import CloseIcon from "../images/close.svg";
 import ReactPlayer from "react-player";
 import ReactPlayerLazy from "react-player/lazy";
+import { getIcon } from "../fontawesome/icons";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 const stylePlayer = `
   max-width: 100%;
@@ -80,19 +82,30 @@ const CloseLightBox = styled(CloseIcon)`
   cursor: pointer;
 `;
 
-const PlayIconStyled = styled(PlayIcon)`
-  position: absolute;
-  width: 120px;
-  top: calc(50% - 60px);
-  left: calc(50% - 60px);
-`;
-
 const VideoOverlay = styled.div`
   display: block;
   width: 100%;
   cursor: pointer;
   height: 100%;
   position: absolute;
+  overflow: hidden;
+
+  & svg {
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    top: calc(50% - 60px);
+    left: calc(50% - 60px);
+    opacity: .8;
+    fill: white;
+    color: white;
+    filter: blur(0.5px);
+    transition: opacity 0.5s;
+  }
+
+  &:hover svg {
+    opacity: 1;
+  }
 `;
 
 const Video = (props) => {
@@ -113,7 +126,7 @@ const Video = (props) => {
     video_type = "youtube",
     image_overlay,
     show_image_overlay,
-    // play_icon,
+    play_icon,
     hosted_url,
     vimeo_byline = "yes",
     vimeo_portrait = "yes",
@@ -128,7 +141,7 @@ const Video = (props) => {
     youtube: youtube_url,
     vimeo: vimeo_url,
     dailymotion: dailymotion_url,
-    hosted: hosted_url.url,
+    hosted: hosted_url?.url,
   };
 
   const playerConfig = {
@@ -190,7 +203,6 @@ const Video = (props) => {
     }
   );
 
-  console.log(props);
   return (
     <VideoContainer>
       {(!showOverlay || !show_image_overlay) &&
@@ -207,8 +219,12 @@ const Video = (props) => {
       {((show_image_overlay === "yes" && showOverlay) ||
         lightbox === "yes") && (
         <VideoOverlay onClick={() => setShowOverlay(false)}>
-          <GatsbyImage image={image_overlay.data} alt="Film" />
-          <PlayIconStyled />
+          <GatsbyImage style={{width: "100%"}} image={image_overlay.data} alt="Film" />
+          {play_icon ?
+            <FontAwesomeIcon icon={getIcon(play_icon.library, play_icon.value.split(" ")[1])}/>
+            :
+            <PlayIcon/>
+          }
         </VideoOverlay>
       )}
     </VideoContainer>
