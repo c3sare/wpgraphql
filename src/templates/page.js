@@ -14,6 +14,9 @@ import Seo from "../components/seo";
 import Video from "../Elementor/Video";
 import Button from "../Elementor/Button";
 import Divider from "../Elementor/Divider";
+import Spacer from "../Elementor/Spacer";
+import GoogleMaps from "../Elementor/GoogleMaps";
+import IconElementor from "../Elementor/IconElementor";
 
 const elTypes = {
     "section": Section,
@@ -23,7 +26,10 @@ const elTypes = {
     "text-editor": TextEditor,
     "video": Video,
     "button": Button,
-    "divider": Divider
+    "divider": Divider,
+    "spacer": Spacer,
+    "google_maps": GoogleMaps,
+    "icon": IconElementor,
 }
 
 const PageTemplate = ({ pageContext: {elContent, title, description}, location }) => {

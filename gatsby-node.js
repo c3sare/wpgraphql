@@ -214,7 +214,7 @@ function transformNode(nodes, { graphql, reporter }) {
 
           if(query.data.wpMediaItem?.publicUrl) item.settings.image.fullSizeUrl = query.data.wpMediaItem.publicUrl;
 
-      } else if(item.widgetType === "video" && item.elType === "widget" && item?.settings?.show_overlay === "yes") {
+      } else if(item.widgetType === "video" && item.elType === "widget" && item?.settings?.show_image_overlay === "yes") {
         const sizeImage = await graphql(`
           query getImageSize($url: String!){
             wpMediaItem(sourceUrl: {eq: $url}) {

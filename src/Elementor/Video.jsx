@@ -136,6 +136,7 @@ const Video = (props) => {
     showinfo = "yes",
     lightbox,
   } = props;
+  console.log(props);
 
   const videoUrl = {
     youtube: youtube_url,
