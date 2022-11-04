@@ -11,14 +11,15 @@ const sizeHeader = {
   xxl: 59,
 };
 
-const getColor = (title_color) => {
-  const color = title_color.slice(title_color.indexOf("=") + 1);
+export const getColor = (title_color) => {
+  const color = title_color?.slice(title_color?.indexOf("=") + 1);
 
   const colors = {
     primary: "#6EC1E4",
     secondary: "#54595F",
     text: "#7A7A7A",
     accent: "#61CE70",
+    white: "#FFFFFF",
   };
   return colors[color] || colors["primary"];
 };
@@ -185,7 +186,7 @@ const HeaderStyle = styled(Header)`
       : ""}
 
   ${(props) => `
-    color: ${props.title_color || getColor(props.__globals__.title_color)};
+    color: ${props.title_color || getColor(props?.__globals__?.title_color)};
   `}
 
   ${(props) =>

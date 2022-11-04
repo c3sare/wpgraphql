@@ -1,4 +1,5 @@
-import React from "react"
+import React from "react";
+import "../css/keyframes.css";
 
 import "../css/@wordpress/block-library/build-style/style.css"
 import "../css/@wordpress/block-library/build-style/theme.css";
