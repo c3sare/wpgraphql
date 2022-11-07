@@ -9,7 +9,7 @@ const libraries = {
 };
 
 export const getIcon = (library, value) => {
-    const x = value.split("-");
+    const x = value?.split("-");
     const newItem = x.map((item, index) => {
         if(index !== 0) item = item[0].toUpperCase()+item.slice(1);
         return item;
