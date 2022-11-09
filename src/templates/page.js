@@ -10,6 +10,7 @@ import Column from "../Elementor/Column";
 import Heading from "../Elementor/Heading";
 import Image from '../Elementor/Image';
 import TextEditor from "../Elementor/TextEditor";
+import parse from "html-react-parser";
 
 import Seo from "../components/seo";
 import Video from "../Elementor/Video";
@@ -33,14 +34,14 @@ const elTypes = {
     "icon": IconElementor,
 }
 
-const PageTemplate = ({ pageContext: {elContent, title, description}, location }) => {
+const PageTemplate = ({ pageContext: {elContent, title, description, headlessUrl, content}, location }) => {
   function generatePage(nodes) {
     return nodes.map(node =>
         React.createElement.apply(
             this,
             [
                 elTypes[node.elType === 'widget' ? node.widgetType : node.elType],
-                {...node.settings, key: node.id, location}
+                {...node.settings, key: node.id, location, headlessUrl}
             ]
         .concat(node.elements.length > 0 ? generatePage(node.elements) : [])
     ));
@@ -49,7 +50,7 @@ const PageTemplate = ({ pageContext: {elContent, title, description}, location }
   return (
     <Layout title={title} description={description}>
       <h1>{title}</h1>
-      {generatePage(elContent)}
+      {elContent ? generatePage(elContent) : parse(content)}
     </Layout>
   )
 }

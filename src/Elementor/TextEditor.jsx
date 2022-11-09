@@ -1,7 +1,8 @@
 import React from "react";
 import styled from "styled-components";
 import { device } from "../mediaquery/size";
-import parse from "html-react-parser";
+import parse, {attributesToProps, domToReact} from "html-react-parser";
+import {Link} from "gatsby";
 
 const TextEditorStyled = styled.div`
   ${(props) => {
@@ -265,16 +266,64 @@ const TextEditorStyled = styled.div`
   }}
 `;
 
+const LinkExternal = styled.a`
+  color: inherit;
+  text-decoration: none;
+`;
+
+const LinkInternal = styled(Link)`
+  color: inherit;
+  text-decoration: none;
+`;
+
 const TextEditor = (props) => {
-  console.log(props);
-  const { editor } = props;
+  const { editor, location, headlessUrl } = props;
+  const [contentEditor, setContentEditor] = React.useState(null);
+
+  React.useEffect(() => {
+    const checkDomain = function (url) {
+      if (url.indexOf("//") === 0) {
+        url = location.protocol + url;
+      }
+      return url
+        .toLowerCase()
+        .replace(/([a-z])?:\/\//, "$1")
+        .split("/")[0];
+    };
+
+    const isExternal = function (url) {
+      return (
+        (url.indexOf(":") > -1 || url.indexOf("//") > -1) &&
+        checkDomain(location.href) !== checkDomain(url)
+      );
+    };
+
+    const options = {
+      replace: node => {
+        if (node.attribs && node.name === 'a') {
+          const props = attributesToProps(node.attribs);
+          const children = domToReact(node.children, options);
+          if(props.href.indexOf(headlessUrl) === 0 || props.href.indexOf(location.href) === 0) {
+            const url = props.href;
+            if(props.href.indexOf(headlessUrl) === 0) {
+              props.href = url.slice(url.indexOf(headlessUrl)+headlessUrl.length-1);
+            } else {
+              props.href = url.slice(url.indexOf(location.href)+location.href.length-1);
+            }
+          }
+          if(isExternal(node.attribs.href)) return <LinkExternal {...{...props, children}}/>;
+          else {
+            return <LinkInternal {...{to: props.href, children}} />
+          }
+        }
+      }
+    };
+    setContentEditor(parse(editor, options))
+  }, [location, editor, headlessUrl]);
 
   return (
     <TextEditorStyled {...props}>
-      {parse(
-        editor ||
-          "<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut elit tellus, luctus nec ullamcorper mattis, pulvinar dapibus leo.</p>"
-      )}
+      {contentEditor}
     </TextEditorStyled>
   );
 };

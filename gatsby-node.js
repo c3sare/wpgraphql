@@ -1,5 +1,6 @@
 const path = require(`path`)
 const chunk = require(`lodash/chunk`);
+const parse = require("html-dom-parser");
 require("dotenv").config({
   path: `.env`,
 })
@@ -35,14 +36,16 @@ function getElementorPages(pages, gatsbyUtilities) {
 
 const createIndividualPages = ({ pagesElementor, gatsbyUtilities }) =>
   Promise.all(
-    pagesElementor.map(({ uri, elementorContent, title, internal: {description}}) => {
+    pagesElementor.map(({ uri, elementorContent, title, content, internal: {description}}) => {
       return gatsbyUtilities.actions.createPage({
         path: uri,
         component: path.resolve(`./src/templates/page.js`),
         context: {
           elContent: elementorContent,
           title,
-          description
+          description,
+          content,
+          headlessUrl: process.env.WP_URL
         },
       })
     })
@@ -291,6 +294,10 @@ function transformNode(nodes, { graphql, reporter }) {
         }
       }
 
+      // if(item.elType === "widget" && item.widgetType === "text-editor") {
+      //   item.settings.editor = parse(item.settings.editor);
+      // }
+
       if(item.elements?.length > 0) item.elements = await transformNode(item.elements, { graphql, reporter });
 
       return item;
@@ -305,6 +312,7 @@ async function getPages({ graphql, reporter }) {
           uri
           elementorContent
           title
+          content
           internal {
               description
           }
