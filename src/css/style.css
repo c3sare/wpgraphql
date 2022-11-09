@@ -2,6 +2,23 @@ img {
   max-width: 100%;
 }
 
+.alignleft {
+  margin-right: 1rem;
+  float: left;
+}
+
+.aligncenter {
+  clear: both;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.alignright {
+  float: right;
+  margin-left: 1rem;
+}
+
 :root {
   --maxWidth-none: "none";
   --maxWidth-xs: 20rem;
