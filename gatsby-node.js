@@ -1,6 +1,6 @@
 const path = require(`path`)
 const chunk = require(`lodash/chunk`);
-const parse = require("html-dom-parser");
+const convert = require('xml-js');
 require("dotenv").config({
   path: `.env`,
 })
@@ -294,9 +294,10 @@ function transformNode(nodes, { graphql, reporter }) {
         }
       }
 
-      // if(item.elType === "widget" && item.widgetType === "text-editor") {
-      //   item.settings.editor = parse(item.settings.editor);
-      // }
+      if(item.elType === "widget" && item.widgetType === "text-editor") {
+        item.settings.editor = convert.xml2js("<div>"+item.settings.editor+"</div>", {attributesFn: function(val) {return val}});
+        item.settings.editor = convert.js2xml(item.settings.editor);
+      }
 
       if(item.elements?.length > 0) item.elements = await transformNode(item.elements, { graphql, reporter });
 
