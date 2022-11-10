@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { device } from "../mediaquery/size";
 import convert from "xml-js";
 import {Link} from "gatsby";
+import { GatsbyImage } from "gatsby-plugin-image";
 
 const TextEditorStyled = styled.div`
   ${(props) => {
@@ -323,10 +324,10 @@ const TextEditor = (props) => {
             delete node.attributes.class;
           }
           return node.type === "element"
-            ? (["a"].includes(node.name)
+            ? (["a", "img"].includes(node.name)
                 ? (
                   node.name === "a"
-                    ? linkelement(node) : null
+                    ? linkelement(node) : <GatsbyImage image={node.attributes.src}/>
                 )
                 :
                 React.createElement.apply(

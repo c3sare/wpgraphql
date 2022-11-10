@@ -309,20 +309,23 @@ function transformNode(nodes, { graphql, reporter }) {
           attributesFn: function(props) {
             if(props.src) {
                 console.log(getOrginalName(props.src, props.width, props.height));
-                const query = graphql(`
-                  query getImageTextEditor($url: String!, $x: Int!, $y: Int!){
-                    wpMediaItem(sourceUrl: {eq: $url}) {
-                      gatsbyImage(width: $x, height: $y formats: WEBP, placeholder: BLURRED)
+                new Promise((resolve, _reject) => {
+                  const result = graphql(`
+                    query getImageTextEditor($url: String!, $x: Int!, $y: Int!){
+                      wpMediaItem(sourceUrl: {eq: $url}) {
+                        gatsbyImage(width: $x, height: $y formats: WEBP, placeholder: BLURRED)
+                      }
                     }
-                  }
-                `, {
-                  url: getOrginalName(props.src, props.width, props.height),
-                  x: Number(props.width),
-                  y: Number(props.height),
-                }).then(data => data);
-                //use Promise
-
-                props.src = query.data.wpMediaItem.gatsbyImage;
+                  `, {
+                    url: getOrginalName(props.src, props.width, props.height),
+                    x: Number(props.width),
+                    y: Number(props.height),
+                  });
+                  resolve(result);
+                }).then(data => {
+                  props.src = data.data.wpMediaItem.gatsbyImage;
+                })
+                .catch(err => console.log(err));
             }
             return props;
           }
