@@ -295,8 +295,38 @@ function transformNode(nodes, { graphql, reporter }) {
       }
 
       if(item.elType === "widget" && item.widgetType === "text-editor") {
-        item.settings.editor = convert.xml2js("<div>"+item.settings.editor+"</div>", {attributesFn: function(val) {return val}});
-        item.settings.editor = convert.js2xml(item.settings.editor);
+        const getOrginalName = (name, width, height) => {
+          if(name.indexOf(`-${width}x${height}`) > 0) {
+            return name.slice(0, name.indexOf(`-${width}x${height}`))+name.slice(name.lastIndexOf("."));
+          } else {
+            return name;
+          }
+        }
+
+        item.settings.editor = convert.xml2js(
+          "<div>"+item.settings.editor+"</div>",
+        {
+          attributesFn: function(props) {
+            if(props.src) {
+                console.log(getOrginalName(props.src, props.width, props.height));
+                const query = graphql(`
+                  query getImageTextEditor($url: String!, $x: Int!, $y: Int!){
+                    wpMediaItem(sourceUrl: {eq: $url}) {
+                      gatsbyImage(width: $x, height: $y formats: WEBP, placeholder: BLURRED)
+                    }
+                  }
+                `, {
+                  url: getOrginalName(props.src, props.width, props.height),
+                  x: Number(props.width),
+                  y: Number(props.height),
+                }).then(data => data);
+                //use Promise
+
+                props.src = query.data.wpMediaItem.gatsbyImage;
+            }
+            return props;
+          }
+        });
       }
 
       if(item.elements?.length > 0) item.elements = await transformNode(item.elements, { graphql, reporter });
