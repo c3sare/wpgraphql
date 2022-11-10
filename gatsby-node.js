@@ -147,7 +147,7 @@ function transformNode(nodes, { graphql, reporter }) {
       if(item.elType === "widget" && item.widgetType === "image") {
         const sizeImage = await graphql(`
           query getImageSize($url: String!){
-            wpMediaItem(sourceUrl: {eq: $url}) {
+            wpMediaItem(guid: {eq: $url}) {
               width
               height
             }
@@ -184,7 +184,7 @@ function transformNode(nodes, { graphql, reporter }) {
 
           const query = await graphql(`
             query getImage($url: String!, $size: Int!, $greater: Boolean!, $less: Boolean!, $custom: Boolean!, $x: Int!, $y: Int!, $lightbox: Boolean!){
-              wpMediaItem(sourceUrl: {eq: $url}) {
+              wpMediaItem(guid: {eq: $url}) {
                 widthimage: gatsbyImage(width: $size, formats: WEBP, placeholder: BLURRED) @include (if: $greater)
                 heightimage: gatsbyImage(height: $size, formats: WEBP, placeholder: BLURRED) @include (if: $less)
                 customimage: gatsbyImage(width: $y, height: $x, formats: WEBP, placeholder: BLURRED, cropFocus: CENTER) @include (if: $custom)
@@ -220,7 +220,7 @@ function transformNode(nodes, { graphql, reporter }) {
       } else if(item.widgetType === "video" && item.elType === "widget" && item?.settings?.show_image_overlay === "yes") {
         const sizeImage = await graphql(`
           query getImageSize($url: String!){
-            wpMediaItem(sourceUrl: {eq: $url}) {
+            wpMediaItem(guid: {eq: $url}) {
               width
               height
             }
@@ -257,7 +257,7 @@ function transformNode(nodes, { graphql, reporter }) {
 
         const query = await graphql(`
           query getImage($url: String!, $size: Int!, $greater: Boolean!, $less: Boolean!, $custom: Boolean!, $x: Int!, $y: Int!){
-            wpMediaItem(sourceUrl: {eq: $url}) {
+            wpMediaItem(guid: {eq: $url}) {
               widthimage: gatsbyImage(width: $size, formats: WEBP, placeholder: BLURRED) @include (if: $greater)
               heightimage: gatsbyImage(height: $size, formats: WEBP, placeholder: BLURRED) @include (if: $less)
               customimage: gatsbyImage(width: $y, height: $x, formats: WEBP, placeholder: BLURRED, cropFocus: CENTER) @include (if: $custom)
@@ -297,9 +297,9 @@ function transformNode(nodes, { graphql, reporter }) {
       if(item.elType === "widget" && item.widgetType === "text-editor") {
         const getOrginalName = (name, width, height) => {
           if(name.indexOf(`-${width}x${height}`) > 0) {
-            return name.slice(0, name.indexOf(`-${width}x${height}`))+name.slice(name.lastIndexOf("."));
-          } else {
             return name;
+          } else {
+            return name.slice(0, name.lastIndexOf("."))+`-${width}x${height}`+name.slice(name.lastIndexOf("."));
           }
         }
 
@@ -308,22 +308,24 @@ function transformNode(nodes, { graphql, reporter }) {
         {
           attributesFn: function(props) {
             if(props.src) {
-                console.log(getOrginalName(props.src, props.width, props.height));
                 new Promise((resolve, _reject) => {
                   const result = graphql(`
                     query getImageTextEditor($url: String!, $x: Int!, $y: Int!){
-                      wpMediaItem(sourceUrl: {eq: $url}) {
+                      first: wpMediaItem(mediaDetails:{sizes:{elemMatch:{sourceUrl:{eq: $url}}}}) {
+                        gatsbyImage(width: $x, height: $y formats: WEBP, placeholder: BLURRED)
+                      }
+                      second: wpMediaItem(guid: {eq: $url}) {
                         gatsbyImage(width: $x, height: $y formats: WEBP, placeholder: BLURRED)
                       }
                     }
                   `, {
-                    url: getOrginalName(props.src, props.width, props.height),
+                    url: props.src,
                     x: Number(props.width),
                     y: Number(props.height),
                   });
                   resolve(result);
                 }).then(data => {
-                  props.src = data.data.wpMediaItem.gatsbyImage;
+                  props.src = data.data.first?.gatsbyImage || data.data.second?.gatsbyImage;
                 })
                 .catch(err => console.log(err));
             }
