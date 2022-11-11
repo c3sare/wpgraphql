@@ -147,7 +147,7 @@ function transformNode(nodes, { graphql, reporter }) {
       if(item.elType === "widget" && item.widgetType === "image") {
         const sizeImage = await graphql(`
           query getImageSize($url: String!){
-            wpMediaItem(guid: {eq: $url}) {
+            wpMediaItem(sourceUrl: {eq: $url}) {
               width
               height
             }
@@ -184,7 +184,7 @@ function transformNode(nodes, { graphql, reporter }) {
 
           const query = await graphql(`
             query getImage($url: String!, $size: Int!, $greater: Boolean!, $less: Boolean!, $custom: Boolean!, $x: Int!, $y: Int!, $lightbox: Boolean!){
-              wpMediaItem(guid: {eq: $url}) {
+              wpMediaItem(sourceUrl: {eq: $url}) {
                 widthimage: gatsbyImage(width: $size, formats: WEBP, placeholder: BLURRED) @include (if: $greater)
                 heightimage: gatsbyImage(height: $size, formats: WEBP, placeholder: BLURRED) @include (if: $less)
                 customimage: gatsbyImage(width: $y, height: $x, formats: WEBP, placeholder: BLURRED, cropFocus: CENTER) @include (if: $custom)
@@ -220,7 +220,7 @@ function transformNode(nodes, { graphql, reporter }) {
       } else if(item.widgetType === "video" && item.elType === "widget" && item?.settings?.show_image_overlay === "yes") {
         const sizeImage = await graphql(`
           query getImageSize($url: String!){
-            wpMediaItem(guid: {eq: $url}) {
+            wpMediaItem(sourceUrl: {eq: $url}) {
               width
               height
             }
@@ -257,7 +257,7 @@ function transformNode(nodes, { graphql, reporter }) {
 
         const query = await graphql(`
           query getImage($url: String!, $size: Int!, $greater: Boolean!, $less: Boolean!, $custom: Boolean!, $x: Int!, $y: Int!){
-            wpMediaItem(guid: {eq: $url}) {
+            wpMediaItem(sourceUrl: {eq: $url}) {
               widthimage: gatsbyImage(width: $size, formats: WEBP, placeholder: BLURRED) @include (if: $greater)
               heightimage: gatsbyImage(height: $size, formats: WEBP, placeholder: BLURRED) @include (if: $less)
               customimage: gatsbyImage(width: $y, height: $x, formats: WEBP, placeholder: BLURRED, cropFocus: CENTER) @include (if: $custom)
@@ -312,10 +312,10 @@ function transformNode(nodes, { graphql, reporter }) {
                   const result = graphql(`
                     query getImageTextEditor($url: String!, $x: Int!, $y: Int!){
                       first: wpMediaItem(mediaDetails:{sizes:{elemMatch:{sourceUrl:{eq: $url}}}}) {
-                        gatsbyImage(width: $x, height: $y formats: WEBP, placeholder: BLURRED)
+                        gatsbyImage(width: $x, height: $y formats: WEBP)
                       }
                       second: wpMediaItem(guid: {eq: $url}) {
-                        gatsbyImage(width: $x, height: $y formats: WEBP, placeholder: BLURRED)
+                        gatsbyImage(width: $x, height: $y formats: WEBP)
                       }
                     }
                   `, {

@@ -1,12 +1,21 @@
 import { GatsbyImage } from "gatsby-plugin-image";
 import React from "react";
 import styled, { keyframes } from "styled-components";
-import PlayIcon from "../images/play.svg";
 import CloseIcon from "../images/close.svg";
 import ReactPlayer from "react-player";
 import ReactPlayerLazy from "react-player/lazy";
 import { getIcon } from "../fontawesome/icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { device } from "../mediaquery/size";
+
+const aspectRatio = {
+  11: "100%",
+  32: "66.6666%",
+  43: "75%",
+  169: "56.25%",
+  219: "42.8571%",
+  916: "177.8%",
+};
 
 const stylePlayer = `
   max-width: 100%;
@@ -57,19 +66,41 @@ const ReactPlayerLazyStyled = styled(ReactPlayerLazy)`
 `;
 
 const VideoContainer = styled.div`
-  padding-bottom: 56.25%;
-  position: relative;
+  ${(props) => `
+    padding-bottom: ${
+      aspectRatio[props.lightbox === "yes" ? "169" : props.aspect_ratio]
+    };
+    position: relative;
+  `}
+  ${(props) => {
+    const {
+      css_filters_blur,
+      css_filters_brightness,
+      css_filters_contrast,
+      css_filters_css_filter,
+      css_filters_hue,
+      css_filters_saturate,
+    } = props;
+    if (css_filters_css_filter !== "custom") return "";
+    const tab = [];
+    if (css_filters_blur) tab.push(`blur(${css_filters_blur?.size}px)`);
+    if (css_filters_brightness)
+      tab.push(`brightness(${css_filters_brightness?.size}%)`);
+    if (css_filters_contrast)
+      tab.push(`contrast(${css_filters_contrast?.size}%)`);
+    if (css_filters_saturate)
+      tab.push(`saturate(${css_filters_saturate?.size}%)`);
+    if (css_filters_hue) tab.push(`hue-rotate(${css_filters_hue?.size}deg)`);
+
+    if (tab.length > 0) return `filter: ${tab.join(" ")};`;
+    else return "";
+  }}
 `;
 
 const VideoContainerLightbox = styled.div`
   width: 75%;
-  padding-bottom: 46.25%;
+  ${(props) => `padding-bottom: calc(${aspectRatio[props.aspect_ratio]}*0.75);`}
   position: relative;
-
-  @media (max-width: 768px) {
-    padding-bottom: 66.25%;
-    width: 100%;
-  }
 `;
 
 const CloseLightBox = styled(CloseIcon)`
@@ -92,15 +123,67 @@ const VideoOverlay = styled.div`
 
   & svg {
     position: absolute;
-    width: 120px;
-    height: 120px;
-    top: calc(50% - 60px);
-    left: calc(50% - 60px);
+    ${(props) =>
+      props.play_icon_text_shadow_text_shadow_type === "yes"
+        ? `
+      filter: drop-shadow(${props.play_icon_text_shadow_text_shadow.horizontal}px ${props.play_icon_text_shadow_text_shadow.vertical}px ${props.play_icon_text_shadow_text_shadow.blur}px ${props.play_icon_text_shadow_text_shadow.color});
+    `
+        : ""}
+    ${(props) => `
+      width: ${props.play_icon_size.size}${props.play_icon_size.unit};
+      height: ${props.play_icon_size.size}${props.play_icon_size.unit};
+      top: calc(50% - ${props.play_icon_size.size / 2}${
+      props.play_icon_size.unit
+    });
+      left: calc(50% - ${props.play_icon_size.size / 2}${
+      props.play_icon_size.unit
+    });
+    `}
     opacity: 0.8;
-    fill: white;
-    color: white;
-    filter: blur(0.5px);
+    ${(props) => `
+      color: ${props.play_icon_color};
+    `}
     transition: opacity 0.5s;
+
+    ${(props) =>
+      props.play_icon_size_tablet
+        ? `
+      @media ${device.tablet} {
+        width: ${props.play_icon_size_tablet.size}${
+            props.play_icon_size_tablet.unit
+          };
+        height: ${props.play_icon_size_tablet.size}${
+            props.play_icon_size_tablet.unit
+          };
+        top: calc(50% - ${props.play_icon_size_tablet.size / 2}${
+            props.play_icon_size_tablet.unit
+          });
+        left: calc(50% - ${props.play_icon_size_tablet.size / 2}${
+            props.play_icon_size_tablet.unit
+          });
+      }
+    `
+        : ""}
+
+    ${(props) =>
+      props.play_icon_size_mobile
+        ? `
+      @media ${device.mobile} {
+        width: ${props.play_icon_size_mobile.size}${
+            props.play_icon_size_mobile.unit
+          };
+        height: ${props.play_icon_size_mobile.size}${
+            props.play_icon_size_mobile.unit
+          };
+        top: calc(50% - ${props.play_icon_size_mobile.size / 2}${
+            props.play_icon_size_mobile.unit
+          });
+        left: calc(50% - ${props.play_icon_size_mobile.size / 2}${
+            props.play_icon_size_mobile.unit
+          });
+      }
+    `
+        : ""}
   }
 
   &:hover svg {
@@ -111,6 +194,7 @@ const VideoOverlay = styled.div`
 const Video = (props) => {
   const [showOverlay, setShowOverlay] = React.useState(true);
   const {
+    aspect_ratio = "169",
     youtube_url,
     vimeo_url,
     dailymotion_url,
@@ -127,6 +211,10 @@ const Video = (props) => {
     image_overlay,
     show_image_overlay,
     play_icon,
+    play_icon_color = "white",
+    play_icon_size = { size: 120, unit: "px" },
+    play_icon_size_tablet,
+    play_icon_size_mobile,
     hosted_url,
     vimeo_byline = "yes",
     vimeo_portrait = "yes",
@@ -135,6 +223,14 @@ const Video = (props) => {
     logo = "yes",
     showinfo = "yes",
     lightbox,
+    css_filters_blur,
+    css_filters_brightness,
+    css_filters_contrast,
+    css_filters_css_filter,
+    css_filters_hue,
+    css_filters_saturate,
+    play_icon_text_shadow_text_shadow,
+    play_icon_text_shadow_text_shadow_type,
   } = props;
   console.log(props);
 
@@ -210,36 +306,56 @@ const Video = (props) => {
   );
 
   return (
-    <VideoContainer>
-      {(!showOverlay || !show_image_overlay) &&
-        (lightbox === "yes" ? (
-          <>
-            <LightBoxVideo onClick={handleCloseLightBox}>
-              <VideoContainerLightbox>{video}</VideoContainerLightbox>
-              <CloseLightBox onClick={handleCloseLightBox} />
-            </LightBoxVideo>
-          </>
-        ) : (
-          video
-        ))}
-      {((show_image_overlay === "yes" && showOverlay) ||
-        lightbox === "yes") && (
-        <VideoOverlay onClick={() => setShowOverlay(false)}>
-          <GatsbyImage
-            style={{ width: "100%" }}
-            image={image_overlay.data}
-            alt="Film"
-          />
-          {play_icon ? (
-            <FontAwesomeIcon
-              icon={getIcon(play_icon.library, play_icon.value.split(" ")[1])}
+    <>
+      <VideoContainer
+        {...{
+          aspect_ratio,
+          lightbox,
+          css_filters_blur,
+          css_filters_brightness,
+          css_filters_contrast,
+          css_filters_css_filter,
+          css_filters_hue,
+          css_filters_saturate,
+        }}
+      >
+        {(!showOverlay || !show_image_overlay) && lightbox !== "yes" && video}
+        {((show_image_overlay === "yes" && showOverlay) ||
+          lightbox === "yes") && (
+          <VideoOverlay
+            onClick={() => setShowOverlay(false)}
+            {...{
+              play_icon_color,
+              play_icon_size,
+              play_icon_size_tablet,
+              play_icon_size_mobile,
+              play_icon_text_shadow_text_shadow,
+              play_icon_text_shadow_text_shadow_type,
+            }}
+          >
+            <GatsbyImage
+              style={{ width: "100%", height: "100%" }}
+              image={image_overlay.data}
+              alt="Film"
             />
-          ) : (
-            <PlayIcon />
-          )}
-        </VideoOverlay>
+            <FontAwesomeIcon
+              icon={getIcon(
+                play_icon?.library || "fa-regular",
+                play_icon?.value?.split(" ")[1] || "fa-play-circle"
+              )}
+            />
+          </VideoOverlay>
+        )}
+      </VideoContainer>
+      {(!showOverlay || !show_image_overlay) && lightbox === "yes" && (
+        <LightBoxVideo onClick={handleCloseLightBox}>
+          <VideoContainerLightbox {...{ aspect_ratio }}>
+            {video}
+          </VideoContainerLightbox>
+          <CloseLightBox onClick={handleCloseLightBox} />
+        </LightBoxVideo>
       )}
-    </VideoContainer>
+    </>
   );
 };
 

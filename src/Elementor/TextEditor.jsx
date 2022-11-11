@@ -1,9 +1,8 @@
 import React from "react";
 import styled from "styled-components";
 import { device } from "../mediaquery/size";
-import convert from "xml-js";
-import {Link} from "gatsby";
-import { GatsbyImage } from "gatsby-plugin-image";
+import { Link } from "gatsby";
+import { getSrcSet } from "gatsby-plugin-image";
 
 const TextEditorStyled = styled.div`
   ${(props) => {
@@ -280,7 +279,6 @@ const LinkInternal = styled(Link)`
 const TextEditor = (props) => {
   const { editor, location, headlessUrl } = props;
   const [contentEditor, setContentEditor] = React.useState(null);
-  console.log(editor);
 
   React.useEffect(() => {
     const checkDomain = function (url) {
@@ -300,57 +298,72 @@ const TextEditor = (props) => {
       );
     };
 
-    const linkelement = node => {
+    const linkelement = (node) => {
       const props = node.attributes;
       const children = createNodes(node.elements);
-      if(props.href.indexOf(headlessUrl) === 0 || props.href.indexOf(location.href) === 0) {
+      if (
+        props.href.indexOf(headlessUrl) === 0 ||
+        props.href.indexOf(location.href) === 0
+      ) {
         const url = props.href;
-        if(props.href.indexOf(headlessUrl) === 0) {
-          props.href = url.slice(url.indexOf(headlessUrl)+headlessUrl.length-1);
+        if (props.href.indexOf(headlessUrl) === 0) {
+          props.href = url.slice(
+            url.indexOf(headlessUrl) + headlessUrl.length - 1
+          );
         } else {
-          props.href = url.slice(url.indexOf(location.href)+location.href.length-1);
+          props.href = url.slice(
+            url.indexOf(location.href) + location.href.length - 1
+          );
         }
       }
-      if(isExternal(props.href)) return <LinkExternal {...{...props, children}}/>;
+      if (isExternal(props.href))
+        return <LinkExternal {...{ ...props, children }} />;
       else {
-        return <LinkInternal {...{to: props.href, children}} />
+        return <LinkInternal {...{ to: props.href, children }} />;
       }
-    }
+    };
 
     function createNodes(nodes) {
       return nodes.map((node, index) => {
-          if(node.attributes?.class) {
-            node.attributes.className = node.attributes.class;
-            delete node.attributes.class;
-          }
-          return node.type === "element"
-            ? (["a", "img"].includes(node.name)
-                ? (
-                  node.name === "a"
-                    ? linkelement(node) : <GatsbyImage image={node.attributes.src}/>
-                )
-                :
-                React.createElement.apply(
-                  this,
-                  [
-                      node.name,
-                      node.attributes ? {...node.attributes, key: index} : {key: index}
-                  ]
-                  .concat(node.elements?.length > 0 ? createNodes(node?.elements) : [])
-                )
+        if (node.attributes?.class) {
+          node.attributes.className = node.attributes.class;
+          delete node.attributes.class;
+        }
+        return node.type === "element" ? (
+          ["a", "img"].includes(node.name) ? (
+            node.name === "a" ? (
+              linkelement(node)
+            ) : (
+              <img
+                srcSet={getSrcSet(node.attributes.src)}
+                alt={node.attributes.alt}
+                width={node.attributes.width}
+                height={node.attributes.height}
+              />
+            )
+          ) : (
+            React.createElement.apply(
+              this,
+              [
+                node.name,
+                node.attributes
+                  ? { ...node.attributes, key: index }
+                  : { key: index },
+              ].concat(
+                node.elements?.length > 0 ? createNodes(node?.elements) : []
               )
-            : node.text
+            )
+          )
+        ) : (
+          node.text
+        );
       });
     }
 
-    setContentEditor(createNodes(editor.elements))
+    setContentEditor(createNodes(editor.elements[0].elements));
   }, [location, editor, headlessUrl]);
 
-  return (
-    <TextEditorStyled {...props}>
-      {contentEditor}
-    </TextEditorStyled>
-  );
+  return <TextEditorStyled {...props}>{contentEditor}</TextEditorStyled>;
 };
 
 export default TextEditor;
