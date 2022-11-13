@@ -33,7 +33,7 @@ const stylePlayer = `
 `;
 
 const StyledAnimatedLightbox = React.forwardRef((props, ref) => {
-  const animationName = props.lightbox_content_animation;
+  const animationName = props.lightbox_content_animation || "fadeIn";
 
   const newClassName =
     props.className + (animationName ? ` animated ${animationName}` : "");
