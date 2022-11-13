@@ -1,6 +1,6 @@
 import { GatsbyImage } from "gatsby-plugin-image";
 import React from "react";
-import styled, { keyframes } from "styled-components";
+import styled from "styled-components";
 import CloseIcon from "../images/close.svg";
 import ReactPlayer from "react-player";
 import ReactPlayerLazy from "react-player/lazy";
@@ -32,29 +32,49 @@ const stylePlayer = `
   background-color: #000;
 `;
 
-const fadeIn = keyframes`
-  from {
-    opacity: 0;
-  }
+const StyledAnimatedLightbox = React.forwardRef((props, ref) => {
+  const animationName = props.lightbox_content_animation;
 
-  to {
-    opacity: 1;
-  }
-`;
+  const newClassName =
+    props.className + (animationName ? ` animated ${animationName}` : "");
 
-const LightBoxVideo = styled.div`
-  width: 100%;
-  height: 100%;
-  position: fixed;
-  top: 0;
-  left: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  animation: ${fadeIn} 0.4s forwards ease-in;
+  return (
+    <div ref={ref} onClick={props.onClick} className={newClassName}>
+      {props.children}
+    </div>
+  );
+});
+
+const LightBoxVideo = styled(StyledAnimatedLightbox)`
+  ${(props) => `
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: ${props.lightbox_color || "rgba(0, 0, 0, 0.5)"};
+    z-index: 1;
+    display: flex;
+    ${props.lightbox_content_position === "top" ? "padding-top: 60px;" : ""}
+    align-items: ${
+      props.lightbox_content_position === "top" ? "flex-start" : "center"
+    };
+    justify-content: center;
+
+    & > svg {
+      fill: ${props.lightbox_ui_color || "white"};
+    }
+
+    ${
+      props.lightbox_ui_color_hover
+        ? `
+      & > svg:hover {
+        fill ${props.lightbox_ui_color_hover};
+      }
+    `
+        : ""
+    }
+  `}
 `;
 
 const ReactPlayerStyled = styled(ReactPlayer)`
@@ -98,8 +118,14 @@ const VideoContainer = styled.div`
 `;
 
 const VideoContainerLightbox = styled.div`
-  width: 75%;
-  ${(props) => `padding-bottom: calc(${aspectRatio[props.aspect_ratio]}*0.75);`}
+  width: ${(props) =>
+    props.lightbox_video_width ? props.lightbox_video_width.size : "75"}%;
+  ${(props) =>
+    `padding-bottom: calc(${aspectRatio[props.aspect_ratio]}*${
+      props.lightbox_video_width
+        ? props.lightbox_video_width.size / 100
+        : "0.75"
+    });`}
   position: relative;
 `;
 
@@ -193,6 +219,7 @@ const VideoOverlay = styled.div`
 
 const Video = (props) => {
   const [showOverlay, setShowOverlay] = React.useState(true);
+  const lightboxref = React.useRef(null);
   const {
     aspect_ratio = "169",
     youtube_url,
@@ -223,6 +250,12 @@ const Video = (props) => {
     logo = "yes",
     showinfo = "yes",
     lightbox,
+    lightbox_color,
+    lightbox_ui_color,
+    lightbox_ui_color_hover,
+    lightbox_video_width,
+    lightbox_content_position,
+    lightbox_content_animation,
     css_filters_blur,
     css_filters_brightness,
     css_filters_contrast,
@@ -241,9 +274,11 @@ const Video = (props) => {
     hosted: hosted_url?.url,
   };
 
-  const handleCloseLightBox = (e) => {
-    e.currentTarget.style.animationDirection = "reverse";
-    setTimeout(() => setShowOverlay(true), 1000);
+  const handleCloseLightBox = () => {
+    const classNames = lightboxref.current.className.split(" ");
+    const classesWithoutLast = classNames.slice(0, classNames.length - 1);
+    lightboxref.current.className = classesWithoutLast.join(" ") + " fadeOut";
+    setTimeout(() => setShowOverlay(true), 750);
   };
 
   const playerConfig = {
@@ -348,8 +383,18 @@ const Video = (props) => {
         )}
       </VideoContainer>
       {(!showOverlay || !show_image_overlay) && lightbox === "yes" && (
-        <LightBoxVideo onClick={handleCloseLightBox}>
-          <VideoContainerLightbox {...{ aspect_ratio }}>
+        <LightBoxVideo
+          ref={lightboxref}
+          onClick={handleCloseLightBox}
+          {...{
+            lightbox_color,
+            lightbox_ui_color,
+            lightbox_ui_color_hover,
+            lightbox_content_position,
+            lightbox_content_animation,
+          }}
+        >
+          <VideoContainerLightbox {...{ aspect_ratio, lightbox_video_width }}>
             {video}
           </VideoContainerLightbox>
           <CloseLightBox onClick={handleCloseLightBox} />
