@@ -39,7 +39,7 @@ const StyledAnimatedLightbox = React.forwardRef((props, ref) => {
     props.className + (animationName ? ` animated ${animationName}` : "");
 
   return (
-    <div ref={ref} onClick={props.onClick} className={newClassName}>
+    <div ref={ref} onClick={props.onClick} className={newClassName} onKeyDown={props.onKeyDown}>
       {props.children}
     </div>
   );
@@ -385,6 +385,9 @@ const Video = (props) => {
       {(!showOverlay || !show_image_overlay) && lightbox === "yes" && (
         <LightBoxVideo
           ref={lightboxref}
+          onKeyDown={(e) => {
+            if(e.key === "Escape") handleCloseLightBox();
+          }}
           onClick={handleCloseLightBox}
           {...{
             lightbox_color,
