@@ -71,8 +71,6 @@ const Navigation = () => {
     }      
     `).allWpMenuItem.nodes);
 
-    console.log(menuItems);
-
     return (
         <div>
             <ul>

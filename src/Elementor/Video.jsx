@@ -87,9 +87,11 @@ const ReactPlayerLazyStyled = styled(ReactPlayerLazy)`
 
 const VideoContainer = styled.div`
   ${(props) => `
-    padding-bottom: ${
-      aspectRatio[props.lightbox === "yes" ? "169" : props.aspect_ratio]
-    };
+    ${props.lightbox !== "yes" ? `
+      padding-bottom: ${
+        aspectRatio[props.aspect_ratio]
+      };
+    ` : ""}
     position: relative;
   `}
   ${(props) => {
@@ -144,7 +146,9 @@ const VideoOverlay = styled.div`
   width: 100%;
   cursor: pointer;
   height: 100%;
-  position: absolute;
+  ${props => props.lightbox !== "yes" ? `
+    position: absolute;
+  ` : ""}
   overflow: hidden;
 
   & svg {
@@ -265,7 +269,6 @@ const Video = (props) => {
     play_icon_text_shadow_text_shadow,
     play_icon_text_shadow_text_shadow_type,
   } = props;
-  console.log(props);
 
   const videoUrl = {
     youtube: youtube_url,
@@ -360,6 +363,7 @@ const Video = (props) => {
           <VideoOverlay
             onClick={() => setShowOverlay(false)}
             {...{
+              lightbox,
               play_icon_color,
               play_icon_size,
               play_icon_size_tablet,

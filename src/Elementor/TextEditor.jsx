@@ -343,7 +343,6 @@ const TextEditor = (props) => {
               styleObject[newItem.join("")] = splitted?.[1]?.replace(" ", "");
             }
           }
-          console.log(styleObject)
           node.attributes.style = {...styleObject};
         }
         return node.type === "element" ? (
