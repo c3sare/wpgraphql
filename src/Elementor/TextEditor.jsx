@@ -329,21 +329,24 @@ const TextEditor = (props) => {
           node.attributes.className = node.attributes.class;
           delete node.attributes.class;
         }
-        if (node?.attributes?.style && typeof node?.attributes?.style === "string") {
+        if (
+          node?.attributes?.style &&
+          typeof node?.attributes?.style === "string"
+        ) {
           const styleObject = {};
           const allStyleObjects = node.attributes.style.split(";");
-          for(let i=0;i<allStyleObjects.length;i++) {
+          for (let i = 0; i < allStyleObjects.length; i++) {
             const splitted = allStyleObjects?.[i]?.split(":");
-            if(splitted[0] !== "") {
+            if (splitted[0] !== "") {
               const x = splitted?.[0]?.split("-");
               const newItem = x.map((item, index) => {
-                  if(index !== 0) item = item[0].toUpperCase()+item.slice(1);
-                  return item;
+                if (index !== 0) item = item[0].toUpperCase() + item.slice(1);
+                return item;
               });
               styleObject[newItem.join("")] = splitted?.[1]?.replace(" ", "");
             }
           }
-          node.attributes.style = {...styleObject};
+          node.attributes.style = { ...styleObject };
         }
         return node.type === "element" ? (
           ["a", "img"].includes(node.name) ? (

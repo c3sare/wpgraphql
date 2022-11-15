@@ -5,6 +5,7 @@ import styled from "styled-components";
 import { Link } from "gatsby";
 import { device } from "../mediaquery/size";
 import { getColor } from "./Heading";
+import * as animation from "../css/keyframes.module.css";
 
 const flexAlign = {
   left: "flex-start",
@@ -37,8 +38,13 @@ const IconContainer = styled.div`
 `;
 
 const IconBorderHover = (props) => {
+  const normalized = props.hover_animation
+    ? `elementorAnimation${
+        props.hover_animation[0].toUpperCase() + props.hover_animation.slice(1)
+      }`
+    : "";
   const className = `${props.className}${
-    props.hover_animation ? ` elementor-animation-${props.hover_animation}` : ""
+    props.hover_animation ? ` ${animation[normalized]}` : ""
   }`;
 
   return <div className={className}>{props.children}</div>;

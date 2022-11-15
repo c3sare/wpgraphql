@@ -1,4 +1,4 @@
-import { GatsbyImage } from "gatsby-plugin-image";
+import { getSrcSet } from "gatsby-plugin-image";
 import React from "react";
 import styled from "styled-components";
 import CloseIcon from "../images/close.svg";
@@ -32,6 +32,12 @@ const stylePlayer = `
   background-color: #000;
 `;
 
+const Img = (props) => {
+  return (
+    <img srcSet={props.srcSet} alt={props.alt} className={props.className} />
+  );
+};
+
 const StyledAnimatedLightbox = React.forwardRef((props, ref) => {
   const animationName = props.lightbox_content_animation || "fadeIn";
 
@@ -39,7 +45,12 @@ const StyledAnimatedLightbox = React.forwardRef((props, ref) => {
     props.className + (animationName ? ` animated ${animationName}` : "");
 
   return (
-    <div ref={ref} onClick={props.onClick} className={newClassName} onKeyDown={props.onKeyDown}>
+    <div
+      ref={ref}
+      onClick={props.onClick}
+      className={newClassName}
+      onKeyDown={props.onKeyDown}
+    >
       {props.children}
     </div>
   );
@@ -87,11 +98,13 @@ const ReactPlayerLazyStyled = styled(ReactPlayerLazy)`
 
 const VideoContainer = styled.div`
   ${(props) => `
-    ${props.lightbox !== "yes" ? `
-      padding-bottom: ${
-        aspectRatio[props.aspect_ratio]
-      };
-    ` : ""}
+    ${
+      props.lightbox !== "yes"
+        ? `
+      padding-bottom: ${aspectRatio[props.aspect_ratio]};
+    `
+        : ""
+    }
     position: relative;
   `}
   ${(props) => {
@@ -146,9 +159,12 @@ const VideoOverlay = styled.div`
   width: 100%;
   cursor: pointer;
   height: 100%;
-  ${props => props.lightbox !== "yes" ? `
+  ${(props) =>
+    props.lightbox !== "yes"
+      ? `
     position: absolute;
-  ` : ""}
+  `
+      : ""}
   overflow: hidden;
 
   & svg {
@@ -372,11 +388,7 @@ const Video = (props) => {
               play_icon_text_shadow_text_shadow_type,
             }}
           >
-            <GatsbyImage
-              style={{ width: "100%", height: "100%" }}
-              image={image_overlay.data}
-              alt="Film"
-            />
+            <Img srcSet={getSrcSet(image_overlay.data)} alt="Film" />
             <FontAwesomeIcon
               icon={getIcon(
                 play_icon?.library || "fa-regular",
@@ -390,7 +402,7 @@ const Video = (props) => {
         <LightBoxVideo
           ref={lightboxref}
           onKeyDown={(e) => {
-            if(e.key === "Escape") handleCloseLightBox();
+            if (e.key === "Escape") handleCloseLightBox();
           }}
           onClick={handleCloseLightBox}
           {...{
